@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     // Logo e Titolo
                     Image.asset(
-                      'assets/images/logo.png',
+                      'assets/images/logo-02.png',
                       height: 100,
                       width: 100,
                     ),

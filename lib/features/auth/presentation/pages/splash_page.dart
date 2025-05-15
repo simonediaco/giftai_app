@@ -60,7 +60,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
             children: [
               // Logo dell'app
               Image.asset(
-                'assets/images/logo.png',
+                'assets/images/logo-02.png',
                 width: 120,
                 height: 120,
               ),

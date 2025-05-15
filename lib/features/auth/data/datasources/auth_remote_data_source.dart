@@ -22,7 +22,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await _apiClient.post(
         '/api/auth/token/',
         data: {
-          'email': email,
+          'username': email,
           'password': password,
         },
       );
