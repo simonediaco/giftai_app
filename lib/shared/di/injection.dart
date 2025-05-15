@@ -15,6 +15,13 @@ import '../../features/auth/domain/usecases/logout.dart';
 import '../../features/auth/domain/usecases/register.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
+import '../../features/gift_ideas/data/datasources/gift_ideas_remote_data_source.dart';
+import '../../features/gift_ideas/data/repositories/gift_ideas_repository_impl.dart';
+import '../../features/gift_ideas/domain/repositories/gift_ideas_repository.dart';
+import '../../features/gift_ideas/domain/usecases/generate_gift_ideas.dart';
+import '../../features/gift_ideas/presentation/bloc/gift_ideas_bloc.dart';
+
+
 final getIt = GetIt.instance;
 
 Future<void> initializeDependencies() async {
@@ -68,6 +75,25 @@ Future<void> initializeDependencies() async {
       register: getIt<Register>(),
       logout: getIt<Logout>(),
       getCurrentUser: getIt<GetCurrentUser>(),
+    ),
+  );
+  
+  // Gift Ideas Feature
+  getIt.registerSingleton<GiftIdeasRemoteDataSource>(
+    GiftIdeasRemoteDataSourceImpl(getIt<ApiClient>()),
+  );
+
+  getIt.registerSingleton<GiftIdeasRepository>(
+    GiftIdeasRepositoryImpl(getIt<GiftIdeasRemoteDataSource>()),
+  );
+
+  getIt.registerSingleton<GenerateGiftIdeas>(
+    GenerateGiftIdeas(getIt<GiftIdeasRepository>()),
+  );
+
+  getIt.registerFactory<GiftIdeasBloc>(
+    () => GiftIdeasBloc(
+      generateGiftIdeas: getIt<GenerateGiftIdeas>(),
     ),
   );
   

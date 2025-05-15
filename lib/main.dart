@@ -9,6 +9,9 @@ import 'features/auth/presentation/pages/register_page.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'shared/di/injection.dart';
+import 'features/gift_ideas/presentation/pages/gift_generation_page.dart';
+import 'features/gift_ideas/presentation/bloc/gift_ideas_bloc.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +39,9 @@ class MyApp extends StatelessWidget {
         BlocProvider<AuthBloc>(
           create: (context) => getIt<AuthBloc>(),
         ),
+        BlocProvider<GiftIdeasBloc>(
+          create: (context) => getIt<GiftIdeasBloc>(),
+        ),
         // Altri BlocProvider verranno aggiunti qui
       ],
       child: MaterialApp(
@@ -49,6 +55,7 @@ class MyApp extends StatelessWidget {
           LoginPage.routeName: (context) => const LoginPage(),
           RegisterPage.routeName: (context) => const RegisterPage(),
           HomePage.routeName: (context) => const HomePage(),
+          GiftGenerationPage.routeName: (context) => const GiftGenerationPage(),
         },
       ),
     );
