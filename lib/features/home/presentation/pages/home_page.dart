@@ -7,6 +7,7 @@ import '../../../../features/auth/presentation/bloc/auth_event.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../../features/gift_ideas/presentation/pages/gift_generation_page.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../gift_ideas/presentation/pages/gift_wizard_page.dart';
 
 class HomePage extends StatelessWidget {
   static const routeName = '/home';
@@ -55,7 +56,7 @@ class HomePage extends StatelessWidget {
                     ),
                     child: InkWell(
                       onTap: () {
-                        Navigator.of(context).pushNamed(GiftGenerationPage.routeName);
+                        Navigator.of(context).pushNamed(GiftWizardPage.routeName);
                       },
                       borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
                       child: Padding(
@@ -82,7 +83,7 @@ class HomePage extends StatelessWidget {
                             AppButton(
                               text: 'Inizia',
                               onPressed: () {
-                                Navigator.of(context).pushNamed(GiftGenerationPage.routeName);
+                                Navigator.of(context).pushNamed(GiftWizardPage.routeName);
                               },
                               icon: const Icon(Icons.arrow_forward),
                             ),

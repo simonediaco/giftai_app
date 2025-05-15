@@ -12,6 +12,7 @@ class AppTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final bool autofocus;
   final VoidCallback? onTap;
+  final ValueChanged<String>? onChanged;
   final bool readOnly;
   final int? maxLines;
   final int? minLines;
@@ -29,6 +30,7 @@ class AppTextField extends StatelessWidget {
     this.suffixIcon,
     this.autofocus = false,
     this.onTap,
+    this.onChanged,
     this.readOnly = false,
     this.maxLines = 1,
     this.minLines,
@@ -54,6 +56,7 @@ class AppTextField extends StatelessWidget {
           validator: validator,
           autofocus: autofocus,
           onTap: onTap,
+          onChanged: onChanged,
           readOnly: readOnly,
           maxLines: maxLines,
           minLines: minLines,

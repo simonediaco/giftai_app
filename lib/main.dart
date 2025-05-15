@@ -7,6 +7,7 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
+import 'features/gift_ideas/presentation/pages/gift_wizard_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'shared/di/injection.dart';
 import 'features/gift_ideas/presentation/pages/gift_generation_page.dart';
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
           RegisterPage.routeName: (context) => const RegisterPage(),
           HomePage.routeName: (context) => const HomePage(),
           GiftGenerationPage.routeName: (context) => const GiftGenerationPage(),
+          GiftWizardPage.routeName: (context) => const GiftWizardPage(), // Aggiungi questa riga
         },
       ),
     );

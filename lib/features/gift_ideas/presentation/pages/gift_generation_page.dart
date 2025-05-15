@@ -103,7 +103,6 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: AppTheme.spaceL),
-                    
                     // Nome
                     AppTextField(
                       label: 'Nome del destinatario (opzionale)',
