@@ -104,6 +104,7 @@ Future<void> initializeDependencies() async {
       generateGiftIdeas: getIt<GenerateGiftIdeas>(),
     ),
   );
+  
   // Saved Gifts Feature
   getIt.registerSingleton<SavedGiftsRemoteDataSource>(
     SavedGiftsRemoteDataSourceImpl(getIt<ApiClient>()),

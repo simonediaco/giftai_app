@@ -1,4 +1,3 @@
-// lib/main.dart (aggiornato)
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -6,8 +5,6 @@ import 'core/config/app_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/navigation/main_layout.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/auth/presentation/bloc/auth_event.dart';
-import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
@@ -21,7 +18,7 @@ void main() async {
   
   // Inizializza la configurazione dell'app
   AppConfig(
-    apiBaseUrl: 'http://localhost:8000', // Aggiornato con http://
+    apiBaseUrl: 'http://localhost:8000',
     environment: Environment.dev,
     enableLogging: true,
   );
@@ -49,30 +46,20 @@ class MyApp extends StatelessWidget {
           create: (context) => getIt<SavedGiftsBloc>(),
         ),
       ],
-      child: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is Unauthenticated) {
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              LoginPage.routeName,
-              (route) => false,
-            );
-          }
+      child: MaterialApp(
+        title: 'GiftAI',
+        theme: AppTheme.lightTheme(),
+        darkTheme: AppTheme.darkTheme(),
+        themeMode: ThemeMode.system,
+        debugShowCheckedModeBanner: false,
+        initialRoute: SplashPage.routeName,
+        routes: {
+          SplashPage.routeName: (context) => const SplashPage(),
+          LoginPage.routeName: (context) => const LoginPage(),
+          RegisterPage.routeName: (context) => const RegisterPage(),
+          MainLayout.routeName: (context) => const MainLayout(),
+          GiftWizardPage.routeName: (context) => const GiftWizardPage(),
         },
-        child: MaterialApp(
-          title: 'GiftAI',
-          theme: AppTheme.lightTheme(),
-          darkTheme: AppTheme.darkTheme(),
-          themeMode: ThemeMode.system,
-          debugShowCheckedModeBanner: false,
-          initialRoute: SplashPage.routeName,
-          routes: {
-            SplashPage.routeName: (context) => const SplashPage(),
-            LoginPage.routeName: (context) => const LoginPage(),
-            RegisterPage.routeName: (context) => const RegisterPage(),
-            MainLayout.routeName: (context) => const MainLayout(),
-            GiftWizardPage.routeName: (context) => const GiftWizardPage(),
-          },
-        ),
       ),
     );
   }
