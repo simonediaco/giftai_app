@@ -1,25 +1,27 @@
+// lib/main.dart (aggiornato)
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/config/app_config.dart';
 import 'core/theme/app_theme.dart';
+import 'core/navigation/main_layout.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/bloc/auth_event.dart';
+import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
-import 'features/gift_ideas/presentation/pages/gift_wizard_page.dart';
-import 'features/home/presentation/pages/home_page.dart';
-import 'shared/di/injection.dart';
-import 'features/gift_ideas/presentation/pages/gift_generation_page.dart';
 import 'features/gift_ideas/presentation/bloc/gift_ideas_bloc.dart';
-
+import 'features/gift_ideas/presentation/pages/gift_wizard_page.dart';
+import 'features/saved_gifts/presentation/bloc/saved_gifts_bloc.dart';
+import 'shared/di/injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Inizializza la configurazione dell'app
   AppConfig(
-    apiBaseUrl: 'http://localhost:8000', // Aggiungi http:// prima dell'URL
+    apiBaseUrl: 'http://localhost:8000', // Aggiornato con http://
     environment: Environment.dev,
     enableLogging: true,
   );
@@ -43,22 +45,34 @@ class MyApp extends StatelessWidget {
         BlocProvider<GiftIdeasBloc>(
           create: (context) => getIt<GiftIdeasBloc>(),
         ),
-        // Altri BlocProvider verranno aggiunti qui
+        BlocProvider<SavedGiftsBloc>(
+          create: (context) => getIt<SavedGiftsBloc>(),
+        ),
       ],
-      child: MaterialApp(
-        title: 'GiftAI',
-        theme: AppTheme.lightTheme(),
-        darkTheme: AppTheme.darkTheme(),
-        themeMode: ThemeMode.system,
-        initialRoute: SplashPage.routeName,
-        routes: {
-          SplashPage.routeName: (context) => const SplashPage(),
-          LoginPage.routeName: (context) => const LoginPage(),
-          RegisterPage.routeName: (context) => const RegisterPage(),
-          HomePage.routeName: (context) => const HomePage(),
-          GiftGenerationPage.routeName: (context) => const GiftGenerationPage(),
-          GiftWizardPage.routeName: (context) => const GiftWizardPage(), // Aggiungi questa riga
+      child: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is Unauthenticated) {
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              LoginPage.routeName,
+              (route) => false,
+            );
+          }
         },
+        child: MaterialApp(
+          title: 'GiftAI',
+          theme: AppTheme.lightTheme(),
+          darkTheme: AppTheme.darkTheme(),
+          themeMode: ThemeMode.system,
+          debugShowCheckedModeBanner: false,
+          initialRoute: SplashPage.routeName,
+          routes: {
+            SplashPage.routeName: (context) => const SplashPage(),
+            LoginPage.routeName: (context) => const LoginPage(),
+            RegisterPage.routeName: (context) => const RegisterPage(),
+            MainLayout.routeName: (context) => const MainLayout(),
+            GiftWizardPage.routeName: (context) => const GiftWizardPage(),
+          },
+        ),
       ),
     );
   }

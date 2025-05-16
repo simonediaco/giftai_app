@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/config/app_config.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../saved_gifts/presentation/bloc/saved_gifts_state.dart';
 import '../../domain/entities/gift.dart';
+import '../../../../features/saved_gifts/domain/entities/saved_gift.dart';
+import '../../../../features/saved_gifts/presentation/bloc/saved_gifts_bloc.dart';
+import '../../../../features/saved_gifts/presentation/bloc/saved_gifts_event.dart';
 
 class GiftCard extends StatefulWidget {
   final Gift gift;
@@ -22,6 +27,7 @@ class _GiftCardState extends State<GiftCard> with SingleTickerProviderStateMixin
   late Animation<double> _scaleAnimation;
   bool _isFavorite = false;
   
+  // Aggiungi questa funzione nel widget _GiftCardState
   @override
   void initState() {
     super.initState();
@@ -32,6 +38,19 @@ class _GiftCardState extends State<GiftCard> with SingleTickerProviderStateMixin
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+    
+    // Controlla se questo regalo è già nei preferiti
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final savedGiftsState = context.read<SavedGiftsBloc>().state;
+      if (savedGiftsState is SavedGiftsLoaded) {
+        final isAlreadySaved = savedGiftsState.gifts.any((gift) => gift.id == widget.gift.id);
+        if (isAlreadySaved) {
+          setState(() {
+            _isFavorite = true;
+          });
+        }
+      }
+    });
   }
   
   @override
@@ -44,7 +63,50 @@ class _GiftCardState extends State<GiftCard> with SingleTickerProviderStateMixin
     setState(() {
       _isFavorite = !_isFavorite;
     });
-    // TODO: Implementare salvaggio vero e proprio
+    
+    if (_isFavorite) {
+      // Salva il regalo
+      final savedGift = SavedGift(
+        id: widget.gift.id,
+        name: widget.gift.name,
+        price: widget.gift.price,
+        match: widget.gift.match,
+        image: widget.gift.image,
+        category: widget.gift.category,
+        dateAdded: DateTime.now(),
+      );
+      
+      context.read<SavedGiftsBloc>().add(AddSavedGift(savedGift));
+      
+      // Mostra un messaggio di conferma
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.gift.name} salvato nei preferiti'),
+          backgroundColor: Colors.green,
+          action: SnackBarAction(
+            label: 'VEDI',
+            textColor: Colors.white,
+            onPressed: () {
+              // Naviga alla pagina dei regali salvati
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              // Vai alla tab Salvati (indice 2)
+              // Questo dipende da come è strutturata la tua navigazione
+            },
+          ),
+        ),
+      );
+    } else {
+      // Rimuovi dai preferiti
+      context.read<SavedGiftsBloc>().add(RemoveSavedGift(widget.gift.id));
+      
+      // Mostra un messaggio di conferma
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.gift.name} rimosso dai preferiti'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override

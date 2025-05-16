@@ -21,6 +21,14 @@ import '../../features/gift_ideas/domain/repositories/gift_ideas_repository.dart
 import '../../features/gift_ideas/domain/usecases/generate_gift_ideas.dart';
 import '../../features/gift_ideas/presentation/bloc/gift_ideas_bloc.dart';
 
+import '../../features/saved_gifts/data/datasources/saved_gifts_remote_data_source.dart';
+import '../../features/saved_gifts/data/repositories/saved_gifts_repository_impl.dart';
+import '../../features/saved_gifts/domain/repositories/saved_gifts_repository.dart';
+import '../../features/saved_gifts/domain/usecases/get_saved_gifts.dart';
+import '../../features/saved_gifts/domain/usecases/save_gift.dart';
+import '../../features/saved_gifts/domain/usecases/delete_saved_gift.dart';
+import '../../features/saved_gifts/presentation/bloc/saved_gifts_bloc.dart';
+
 
 final getIt = GetIt.instance;
 
@@ -96,6 +104,33 @@ Future<void> initializeDependencies() async {
       generateGiftIdeas: getIt<GenerateGiftIdeas>(),
     ),
   );
-  
+  // Saved Gifts Feature
+  getIt.registerSingleton<SavedGiftsRemoteDataSource>(
+    SavedGiftsRemoteDataSourceImpl(getIt<ApiClient>()),
+  );
+
+  getIt.registerSingleton<SavedGiftsRepository>(
+    SavedGiftsRepositoryImpl(getIt<SavedGiftsRemoteDataSource>()),
+  );
+
+  getIt.registerSingleton<GetSavedGifts>(
+    GetSavedGifts(getIt<SavedGiftsRepository>()),
+  );
+
+  getIt.registerSingleton<SaveGift>(
+    SaveGift(getIt<SavedGiftsRepository>()),
+  );
+
+  getIt.registerSingleton<DeleteSavedGift>(
+    DeleteSavedGift(getIt<SavedGiftsRepository>()),
+  );
+
+  getIt.registerFactory<SavedGiftsBloc>(
+    () => SavedGiftsBloc(
+      getSavedGifts: getIt<GetSavedGifts>(),
+      saveGift: getIt<SaveGift>(),
+      deleteSavedGift: getIt<DeleteSavedGift>(),
+    ),
+  );
   // Altri registri verranno aggiunti man mano che implementiamo le features
 }
