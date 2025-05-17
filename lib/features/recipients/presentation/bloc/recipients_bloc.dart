@@ -63,6 +63,7 @@ class RecipientsBloc extends Bloc<RecipientsEvent, RecipientsState> {
     try {
       final recipient = await createRecipient(event.recipient);
       emit(RecipientSaved(recipient: recipient));
+      add(FetchRecipients());
     } catch (e) {
       emit(RecipientsError(message: e.toString()));
     }
@@ -76,6 +77,7 @@ class RecipientsBloc extends Bloc<RecipientsEvent, RecipientsState> {
     try {
       final recipient = await updateRecipient(event.recipient);
       emit(RecipientSaved(recipient: recipient));
+      add(FetchRecipients());
     } catch (e) {
       emit(RecipientsError(message: e.toString()));
     }
