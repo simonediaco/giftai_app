@@ -11,7 +11,9 @@ import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/gift_ideas/presentation/bloc/gift_ideas_bloc.dart';
 import 'features/gift_ideas/presentation/pages/gift_wizard_page.dart';
 import 'features/saved_gifts/presentation/bloc/saved_gifts_bloc.dart';
+import 'features/recipients/presentation/bloc/recipients_bloc.dart';
 import 'shared/di/injection.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +46,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<SavedGiftsBloc>(
           create: (context) => getIt<SavedGiftsBloc>(),
+        ),
+        BlocProvider<RecipientsBloc>( // Aggiungi questo
+          create: (context) => getIt<RecipientsBloc>(),
         ),
       ],
       child: MaterialApp(

@@ -29,6 +29,15 @@ import '../../features/saved_gifts/domain/usecases/save_gift.dart';
 import '../../features/saved_gifts/domain/usecases/delete_saved_gift.dart';
 import '../../features/saved_gifts/presentation/bloc/saved_gifts_bloc.dart';
 
+import '../../features/recipients/data/datasources/recipients_remote_data_source.dart';
+import '../../features/recipients/data/repositories/recipients_repository_impl.dart';
+import '../../features/recipients/domain/repositories/recipients_repository.dart';
+import '../../features/recipients/domain/usecases/create_recipient.dart';
+import '../../features/recipients/domain/usecases/delete_recipient.dart';
+import '../../features/recipients/domain/usecases/get_recipient.dart';
+import '../../features/recipients/domain/usecases/get_recipients.dart';
+import '../../features/recipients/domain/usecases/update_recipient.dart';
+import '../../features/recipients/presentation/bloc/recipients_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -131,6 +140,45 @@ Future<void> initializeDependencies() async {
       getSavedGifts: getIt<GetSavedGifts>(),
       saveGift: getIt<SaveGift>(),
       deleteSavedGift: getIt<DeleteSavedGift>(),
+    ),
+  );
+
+  // Recipients Feature
+  getIt.registerSingleton<RecipientsRemoteDataSource>(
+    RecipientsRemoteDataSourceImpl(getIt<ApiClient>()),
+  );
+
+  getIt.registerSingleton<RecipientsRepository>(
+    RecipientsRepositoryImpl(getIt<RecipientsRemoteDataSource>()),
+  );
+
+  getIt.registerSingleton<GetRecipients>(
+    GetRecipients(getIt<RecipientsRepository>()),
+  );
+
+  getIt.registerSingleton<GetRecipient>(
+    GetRecipient(getIt<RecipientsRepository>()),
+  );
+
+  getIt.registerSingleton<CreateRecipient>(
+    CreateRecipient(getIt<RecipientsRepository>()),
+  );
+
+  getIt.registerSingleton<UpdateRecipient>(
+    UpdateRecipient(getIt<RecipientsRepository>()),
+  );
+
+  getIt.registerSingleton<DeleteRecipient>(
+    DeleteRecipient(getIt<RecipientsRepository>()),
+  );
+
+  getIt.registerFactory<RecipientsBloc>(
+    () => RecipientsBloc(
+      getRecipients: getIt<GetRecipients>(),
+      getRecipient: getIt<GetRecipient>(),
+      createRecipient: getIt<CreateRecipient>(),
+      updateRecipient: getIt<UpdateRecipient>(),
+      deleteRecipient: getIt<DeleteRecipient>(),
     ),
   );
   // Altri registri verranno aggiunti man mano che implementiamo le features
