@@ -1,6 +1,7 @@
 class GiftWizardData {
   String? name;
-  String? age;
+  String gender = 'X';
+  int? age;
   String? relation;
   List<String> interests;
   String? category;
@@ -8,23 +9,38 @@ class GiftWizardData {
   
   GiftWizardData({
     this.name,
+    this.gender = 'X',
     this.age,
     this.relation,
-    List<String>? interests,
+    this.interests = const [],
     this.category,
     this.budget,
-  }) : interests = interests ?? [];
+  });
 
-  bool get isStepOneComplete => age != null && age!.isNotEmpty;
-  bool get isStepTwoComplete => relation != null && relation!.isNotEmpty;
-  bool get isStepThreeComplete => interests.isNotEmpty;
-  bool get isStepFourComplete => category != null && category!.isNotEmpty;
-  bool get isStepFiveComplete => budget != null && budget!.isNotEmpty;
+  bool get isStepOneComplete => age != null;
+  bool get isStepTwoComplete => gender != null && gender.isNotEmpty;
+  bool get isStepThreeComplete => relation != null && relation!.isNotEmpty;
+  bool get isStepFourComplete => interests.isNotEmpty;
+  bool get isStepFiveComplete => category != null && category!.isNotEmpty;
+  bool get isBudgetComplete => budget != null && budget!.isNotEmpty;
   
   bool get isComplete => 
       isStepOneComplete && 
       isStepTwoComplete && 
       isStepThreeComplete && 
       isStepFourComplete &&
-      isStepFiveComplete;
+      isStepFiveComplete &&
+      isBudgetComplete;
+      
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name ?? '',
+      'age': age?.toString() ?? '',
+      'gender': gender,
+      'relation': relation ?? '',
+      'interests': interests,
+      'category': category ?? '',
+      'budget': budget ?? ''
+    };
+  }
 }

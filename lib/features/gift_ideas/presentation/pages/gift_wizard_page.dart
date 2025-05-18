@@ -9,6 +9,7 @@ import '../bloc/gift_ideas_state.dart';
 import '../models/gift_wizard_data.dart';
 import '../widgets/gift_result_list.dart';
 import '../widgets/wizard_steps/step_age.dart';
+import '../widgets/wizard_steps/step_gender.dart'; // Nuovo step
 import '../widgets/wizard_steps/step_budget.dart';
 import '../widgets/wizard_steps/step_category.dart';
 import '../widgets/wizard_steps/step_interests.dart';
@@ -48,7 +49,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
   }
   
   void _nextStep() {
-    if (_currentStep < 5) {
+    if (_currentStep < 6) {
       setState(() {
         _currentStep++;
       });
@@ -59,11 +60,12 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
       );
       
       // Se siamo all'ultimo step, avviamo la generazione
-      if (_currentStep == 5) {
+      if (_currentStep == 6) {
         context.read<GiftIdeasBloc>().add(
           GenerateGiftIdeasRequested(
             name: _wizardData.name,
-            age: _wizardData.age,
+            gender: _wizardData.gender,
+            age: _wizardData.age?.toString(),
             relation: _wizardData.relation,
             interests: _wizardData.interests,
             category: _wizardData.category,
@@ -92,16 +94,18 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
   String _getStepTitle() {
     switch (_currentStep) {
       case 0:
-        return 'Per chi stai cercando un regalo?';
+        return 'Quanti anni ha il destinatario?';
       case 1:
-        return 'Che tipo di relazione avete?';
+        return 'Qual è il genere del destinatario?';
       case 2:
-        return 'Quali sono i suoi interessi?';
+        return 'Che tipo di relazione avete?';
       case 3:
-        return 'Quale categoria preferisci?';
+        return 'Quali sono i suoi interessi?';
       case 4:
-        return 'Quanto vorresti spendere?';
+        return 'Quale categoria preferisci?';
       case 5:
+        return 'Quanto vorresti spendere?';
+      case 6:
         return 'Stiamo generando idee perfette...';
       default:
         return '';
@@ -126,8 +130,11 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
         },
         builder: (context, state) {
           if (state is GiftIdeasGenerated) {
-            // Mostriamo la lista dei regali generati
-            return GiftResultList(gifts: state.gifts);
+            // Mostriamo la lista dei regali generati e offriamo di salvare destinatario
+            return GiftResultList(
+              gifts: state.gifts,
+              wizardData: _wizardData,
+            );
           }
           
           return SafeArea(
@@ -144,7 +151,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
                       ),
                       Expanded(
                         child: LinearProgressIndicator(
-                          value: (_currentStep + 1) / 6,
+                          value: (_currentStep + 1) / 7,
                           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                           color: Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
@@ -152,7 +159,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
                       ),
                       const SizedBox(width: AppTheme.spaceM),
                       Text(
-                        '${_currentStep + 1}/6',
+                        '${_currentStep + 1}/7',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -186,31 +193,37 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
                         onComplete: _nextStep,
                       ),
                       
-                      // Step 2: Relazione
+                      // Step 2: Genere
+                      StepGender(
+                        wizardData: _wizardData,
+                        onComplete: _nextStep,
+                      ),
+                      
+                      // Step 3: Relazione
                       StepRelation(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
                       
-                      // Step 3: Interessi
+                      // Step 4: Interessi
                       StepInterests(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
                       
-                      // Step 4: Categoria
+                      // Step 5: Categoria
                       StepCategory(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
                       
-                      // Step 5: Budget
+                      // Step 6: Budget
                       StepBudget(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
                       
-                      // Step 6: Loading
+                      // Step 7: Loading
                       const StepLoading(),
                     ],
                   ),

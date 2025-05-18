@@ -22,21 +22,50 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   
-  String _selectedAge = '';
+  // Modificato: Ora usiamo un'età specifica invece di un range
+  int _selectedAge = 30; // Default
+  
+  // Aggiunto: genere con default
+  String _selectedGender = 'X';
+  
   String _selectedRelation = '';
   final List<String> _selectedInterests = [];
   String _selectedCategory = '';
   String _selectedBudget = '';
   
   // Opzioni per i dropdown
-  final List<String> _ageRanges = ['0-12', '13-18', '19-30', '31-50', '51+'];
-  final List<String> _relations = ['Amico', 'Parente', 'Partner', 'Collega', 'Altro'];
+  // Aggiunto: opzioni genere
+  final List<Map<String, String>> _genderOptions = [
+    {'value': 'X', 'label': 'Non specificato'},
+    {'value': 'M', 'label': 'Uomo'},
+    {'value': 'F', 'label': 'Donna'},
+    {'value': 'N', 'label': 'Non binario'},
+    {'value': 'O', 'label': 'Altro'},
+  ];
+  
+  // Modificato: età ora è un elenco di valori singoli
+  final List<int> _commonAges = [18, 25, 30, 40, 50, 65];
+  
+  // Modificato: valori corretti accettati dall'API
+  final List<String> _relations = ['amico', 'familiare', 'partner', 'collega', 'altro'];
+  
+  // Relazioni in formato visualizzabile
+  final Map<String, String> _relationLabels = {
+    'amico': 'Amico',
+    'familiare': 'Familiare',
+    'partner': 'Partner',
+    'collega': 'Collega',
+    'altro': 'Altro',
+  };
+  
   final List<String> _interests = ['Musica', 'Sport', 'Lettura', 'Tecnologia', 'Cucina', 'Viaggi', 'Arte', 'Moda', 'Gaming', 'Film'];
   final List<String> _categories = ['Tech', 'Casa', 'Moda', 'Sport', 'Bellezza', 'Hobby', 'Libri', 'Bambini'];
-  final List<String> _budgets = ['0-20€', '20-50€', '50-100€', '100-200€', '200€+'];
+  
+  // Modificato: budget senza simbolo €
+  final List<String> _budgets = ['0-20', '20-50', '50-100', '100-200', '200+'];
 
   bool _isFormComplete() {
-    return _selectedAge.isNotEmpty &&
+    return _selectedGender.isNotEmpty && // Aggiunto controllo genere
         _selectedRelation.isNotEmpty &&
         _selectedInterests.isNotEmpty &&
         _selectedCategory.isNotEmpty &&
@@ -48,11 +77,12 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
       context.read<GiftIdeasBloc>().add(
         GenerateGiftIdeasRequested(
           name: _nameController.text.trim(),
-          age: _selectedAge,
-          relation: _selectedRelation,
+          age: _selectedAge.toString(), // Convertito a stringa
+          gender: _selectedGender, // Ora passiamo il genere selezionato
+          relation: _selectedRelation, // Ora è nel formato corretto
           interests: _selectedInterests,
           category: _selectedCategory,
-          budget: _selectedBudget,
+          budget: _selectedBudget, // Senza simbolo €
         ),
       );
     }
@@ -103,6 +133,7 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: AppTheme.spaceL),
+                    
                     // Nome
                     AppTextField(
                       label: 'Nome del destinatario (opzionale)',
@@ -112,38 +143,128 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                     ),
                     const SizedBox(height: AppTheme.spaceL),
                     
-                    // Età
-                    DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: 'Fascia d\'età',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                    // NUOVO: Genere
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Genere',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
-                        prefixIcon: const Icon(Icons.cake_outlined),
-                      ),
-                      hint: const Text('Seleziona fascia d\'età'),
-                      value: _selectedAge.isEmpty ? null : _selectedAge,
-                      items: _ageRanges.map((age) {
-                        return DropdownMenuItem<String>(
-                          value: age,
-                          child: Text(age),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedAge = value ?? '';
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Seleziona una fascia d\'età';
-                        }
-                        return null;
-                      },
+                        const SizedBox(height: AppTheme.spaceXS),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            ),
+                            borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                          ),
+                          padding: const EdgeInsets.all(AppTheme.spaceM),
+                          child: Wrap(
+                            spacing: AppTheme.spaceS,
+                            runSpacing: AppTheme.spaceS,
+                            children: _genderOptions.map((gender) {
+                              final isSelected = _selectedGender == gender['value'];
+                              return ChoiceChip(
+                                label: Text(gender['label']!),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  setState(() {
+                                    if (selected) {
+                                      _selectedGender = gender['value']!;
+                                    }
+                                  });
+                                },
+                                backgroundColor: Colors.transparent,
+                                selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: AppTheme.spaceL),
                     
-                    // Relazione
+                    // MODIFICATO: Età specifica invece di range
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Età (approssimativa)',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        const SizedBox(height: AppTheme.spaceXS),
+                        
+                        // Selettore età con +/-
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: () {
+                                if (_selectedAge > 1) {
+                                  setState(() {
+                                    _selectedAge--;
+                                  });
+                                }
+                              },
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                  ),
+                                  borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                                ),
+                                child: Text(
+                                  _selectedAge.toString(),
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline),
+                              onPressed: () {
+                                setState(() {
+                                  _selectedAge++;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        
+                        // Età comuni per selezione rapida
+                        const SizedBox(height: AppTheme.spaceM),
+                        Wrap(
+                          spacing: AppTheme.spaceS,
+                          children: _commonAges.map((age) {
+                            return ChoiceChip(
+                              label: Text(age.toString()),
+                              selected: _selectedAge == age,
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() {
+                                    _selectedAge = age;
+                                  });
+                                }
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppTheme.spaceL),
+                    
+                    // MODIFICATO: Relazione - ora usa i valori corretti per l'API
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'Relazione',
@@ -157,7 +278,7 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       items: _relations.map((relation) {
                         return DropdownMenuItem<String>(
                           value: relation,
-                          child: Text(relation),
+                          child: Text(_relationLabels[relation] ?? relation),
                         );
                       }).toList(),
                       onChanged: (value) {
@@ -174,7 +295,7 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                     ),
                     const SizedBox(height: AppTheme.spaceL),
                     
-                    // Interessi
+                    // Interessi - uguale
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -244,7 +365,7 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                     ),
                     const SizedBox(height: AppTheme.spaceL),
                     
-                    // Categoria
+                    // Categoria - uguale
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'Categoria',
@@ -275,7 +396,7 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                     ),
                     const SizedBox(height: AppTheme.spaceL),
                     
-                    // Budget
+                    // MODIFICATO: Budget - senza simbolo €
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'Budget',
@@ -289,7 +410,7 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       items: _budgets.map((budget) {
                         return DropdownMenuItem<String>(
                           value: budget,
-                          child: Text(budget),
+                          child: Text('$budget€'),
                         );
                       }).toList(),
                       onChanged: (value) {

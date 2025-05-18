@@ -11,10 +11,14 @@ import '../bloc/recipients_state.dart';
 
 class AddRecipientPage extends StatefulWidget {
   final Recipient? recipient;
+  final Recipient? initialData;
+
   
   const AddRecipientPage({
     Key? key,
     this.recipient,
+    this.initialData,
+
   }) : super(key: key);
 
   @override
@@ -69,6 +73,15 @@ class _AddRecipientPageState extends State<AddRecipientPage> {
       _selectedRelation = widget.recipient!.relation;
       _selectedInterests.addAll(widget.recipient!.interests);
       _notesController.text = widget.recipient!.notes ?? '';
+    } 
+    // Pre-compila con dati iniziali se forniti
+    else if (widget.initialData != null) {
+      _nameController.text = widget.initialData!.name;
+      _selectedGender = widget.initialData!.gender;
+      _birthDate = widget.initialData!.birthDate;
+      _selectedRelation = widget.initialData!.relation;
+      _selectedInterests.addAll(widget.initialData!.interests);
+      _notesController.text = widget.initialData!.notes ?? '';
     }
   }
   

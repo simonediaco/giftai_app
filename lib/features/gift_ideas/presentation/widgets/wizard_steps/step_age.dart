@@ -1,10 +1,10 @@
+// lib/features/gift_ideas/presentation/widgets/wizard_steps/step_age.dart
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_theme.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/app_text_field.dart';
 import '../../models/gift_wizard_data.dart';
-import '../wizard_option_card.dart';
 
 class StepAge extends StatefulWidget {
   final GiftWizardData wizardData;
@@ -22,17 +22,19 @@ class StepAge extends StatefulWidget {
 
 class _StepAgeState extends State<StepAge> {
   final _nameController = TextEditingController();
-  final List<String> _ageRanges = ['0-12', '13-18', '19-30', '31-50', '51+'];
-
+  final _ageController = TextEditingController();
+  
   @override
   void initState() {
     super.initState();
     _nameController.text = widget.wizardData.name ?? '';
+    _ageController.text = widget.wizardData.age?.toString() ?? '';
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _ageController.dispose();
     super.dispose();
   }
 
@@ -43,59 +45,107 @@ class _StepAgeState extends State<StepAge> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Campo nome opzionale
+          // Nome (opzionale)
           AppTextField(
             label: 'Nome (opzionale)',
             hint: 'Inserisci il nome del destinatario',
             controller: _nameController,
-            prefixIcon: const Icon(Icons.person_outline),
             onChanged: (value) {
-              widget.wizardData.name = value;
+              widget.wizardData.name = value.isNotEmpty ? value : null;
             },
           ),
           const SizedBox(height: AppTheme.spaceXL),
 
-          // Titolo fascia d'età
+          // Età (richiesta)
           Text(
-            'Fascia d\'età',
+            'Età (approssimativa)',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           const SizedBox(height: AppTheme.spaceM),
-
-          // Opzioni fascia d'età
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1.5,
-              crossAxisSpacing: AppTheme.spaceM,
-              mainAxisSpacing: AppTheme.spaceM,
+          
+          // Selettore età grafico
+          SizedBox(
+            height: 120,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL),
+                width: 200,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed: () {
+                        final currentAge = int.tryParse(_ageController.text) ?? 30;
+                        if (currentAge > 1) {
+                          setState(() {
+                            _ageController.text = (currentAge - 1).toString();
+                            widget.wizardData.age = currentAge - 1;
+                          });
+                        }
+                      },
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _ageController,
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        onChanged: (value) {
+                          final age = int.tryParse(value);
+                          if (age != null) {
+                            widget.wizardData.age = age;
+                          }
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed: () {
+                        final currentAge = int.tryParse(_ageController.text) ?? 30;
+                        if (currentAge < 120) {
+                          setState(() {
+                            _ageController.text = (currentAge + 1).toString();
+                            widget.wizardData.age = currentAge + 1;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
-            itemCount: _ageRanges.length,
-            itemBuilder: (context, index) {
-              final ageRange = _ageRanges[index];
-              final isSelected = widget.wizardData.age == ageRange;
-
-              return WizardOptionCard(
-                title: ageRange,
-                subtitle: _getAgeDescription(ageRange),
-                icon: _getAgeIcon(ageRange),
-                isSelected: isSelected,
-                onTap: () {
-                  setState(() {
-                    widget.wizardData.age = ageRange;
-                    // Salva anche il nome se è stato inserito
-                    widget.wizardData.name = _nameController.text.isNotEmpty
-                        ? _nameController.text
-                        : null;
-                  });
-                },
-              );
-            },
           ),
+          
+          const SizedBox(height: AppTheme.spaceM),
+          
+          // Fascie d'età rapide
+          Center(
+            child: Wrap(
+              spacing: AppTheme.spaceM,
+              children: [
+                _buildQuickAgeButton(18),
+                _buildQuickAgeButton(25),
+                _buildQuickAgeButton(30),
+                _buildQuickAgeButton(40),
+                _buildQuickAgeButton(50),
+                _buildQuickAgeButton(65),
+              ],
+            ),
+          ),
+          
           const SizedBox(height: AppTheme.spaceXL),
 
           // Pulsante per continuare
@@ -112,38 +162,23 @@ class _StepAgeState extends State<StepAge> {
       ),
     );
   }
-
-  String _getAgeDescription(String ageRange) {
-    switch (ageRange) {
-      case '0-12':
-        return 'Bambini';
-      case '13-18':
-        return 'Adolescenti';
-      case '19-30':
-        return 'Giovani adulti';
-      case '31-50':
-        return 'Adulti';
-      case '51+':
-        return 'Senior';
-      default:
-        return '';
-    }
-  }
-
-  IconData _getAgeIcon(String ageRange) {
-    switch (ageRange) {
-      case '0-12':
-        return Icons.child_care;
-      case '13-18':
-        return Icons.school;
-      case '19-30':
-        return Icons.face;
-      case '31-50':
-        return Icons.person;
-      case '51+':
-        return Icons.elderly;
-      default:
-        return Icons.person;
-    }
+  
+  Widget _buildQuickAgeButton(int age) {
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          _ageController.text = age.toString();
+          widget.wizardData.age = age;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        shape: const CircleBorder(),
+        padding: const EdgeInsets.all(AppTheme.spaceM),
+      ),
+      child: Text(
+        age.toString(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
   }
 }

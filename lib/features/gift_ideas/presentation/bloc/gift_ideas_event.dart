@@ -10,6 +10,7 @@ abstract class GiftIdeasEvent extends Equatable {
 class GenerateGiftIdeasRequested extends GiftIdeasEvent {
   final String? name;
   final String? age;
+  final String gender;
   final String? relation;
   final List<String>? interests;
   final String? category;
@@ -18,6 +19,7 @@ class GenerateGiftIdeasRequested extends GiftIdeasEvent {
   const GenerateGiftIdeasRequested({
     this.name,
     this.age,
+    required this.gender,
     this.relation,
     this.interests,
     this.category,
@@ -25,7 +27,7 @@ class GenerateGiftIdeasRequested extends GiftIdeasEvent {
   });
   
   @override
-  List<Object?> get props => [name, age, relation, interests, category, budget];
+  List<Object?> get props => [name, age, gender, relation, interests, category, budget];
 }
 
 class GenerateGiftIdeasForRecipientRequested extends GiftIdeasEvent {
