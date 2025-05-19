@@ -24,6 +24,7 @@ class GiftIdeasBloc extends Bloc<GiftIdeasEvent, GiftIdeasState> {
       final gifts = await generateGiftIdeas(
         name: event.name,
         age: event.age,
+        gender: event.gender,
         relation: event.relation,
         interests: event.interests,
         category: event.category,

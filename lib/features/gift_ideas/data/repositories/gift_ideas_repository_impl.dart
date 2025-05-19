@@ -12,6 +12,7 @@ class GiftIdeasRepositoryImpl implements GiftIdeasRepository {
   Future<List<Gift>> generateGiftIdeas({
     String? name,
     String? age,
+    String? gender,
     String? relation,
     List<String>? interests,
     String? category,
@@ -20,6 +21,7 @@ class GiftIdeasRepositoryImpl implements GiftIdeasRepository {
     final request = GiftGenerationRequest(
       name: name,
       age: age,
+      gender: gender,
       relation: relation,
       interests: interests,
       category: category,

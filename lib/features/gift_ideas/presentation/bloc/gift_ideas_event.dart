@@ -10,7 +10,7 @@ abstract class GiftIdeasEvent extends Equatable {
 class GenerateGiftIdeasRequested extends GiftIdeasEvent {
   final String? name;
   final String? age;
-  final String gender;
+  final String? gender;
   final String? relation;
   final List<String>? interests;
   final String? category;

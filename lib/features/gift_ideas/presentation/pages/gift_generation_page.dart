@@ -11,7 +11,7 @@ import '../widgets/gift_result_list.dart';
 
 class GiftGenerationPage extends StatefulWidget {
   static const routeName = '/gift-generation';
-  
+
   const GiftGenerationPage({Key? key}) : super(key: key);
 
   @override
@@ -21,18 +21,18 @@ class GiftGenerationPage extends StatefulWidget {
 class _GiftGenerationPageState extends State<GiftGenerationPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  
+
   // Modificato: Ora usiamo un'età specifica invece di un range
   int _selectedAge = 30; // Default
-  
+
   // Aggiunto: genere con default
   String _selectedGender = 'X';
-  
+
   String _selectedRelation = '';
   final List<String> _selectedInterests = [];
   String _selectedCategory = '';
   String _selectedBudget = '';
-  
+
   // Opzioni per i dropdown
   // Aggiunto: opzioni genere
   final List<Map<String, String>> _genderOptions = [
@@ -42,13 +42,19 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
     {'value': 'N', 'label': 'Non binario'},
     {'value': 'O', 'label': 'Altro'},
   ];
-  
+
   // Modificato: età ora è un elenco di valori singoli
   final List<int> _commonAges = [18, 25, 30, 40, 50, 65];
-  
+
   // Modificato: valori corretti accettati dall'API
-  final List<String> _relations = ['amico', 'familiare', 'partner', 'collega', 'altro'];
-  
+  final List<String> _relations = [
+    'amico',
+    'familiare',
+    'partner',
+    'collega',
+    'altro'
+  ];
+
   // Relazioni in formato visualizzabile
   final Map<String, String> _relationLabels = {
     'amico': 'Amico',
@@ -57,10 +63,30 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
     'collega': 'Collega',
     'altro': 'Altro',
   };
-  
-  final List<String> _interests = ['Musica', 'Sport', 'Lettura', 'Tecnologia', 'Cucina', 'Viaggi', 'Arte', 'Moda', 'Gaming', 'Film'];
-  final List<String> _categories = ['Tech', 'Casa', 'Moda', 'Sport', 'Bellezza', 'Hobby', 'Libri', 'Bambini'];
-  
+
+  final List<String> _interests = [
+    'Musica',
+    'Sport',
+    'Lettura',
+    'Tecnologia',
+    'Cucina',
+    'Viaggi',
+    'Arte',
+    'Moda',
+    'Gaming',
+    'Film'
+  ];
+  final List<String> _categories = [
+    'Tech',
+    'Casa',
+    'Moda',
+    'Sport',
+    'Bellezza',
+    'Hobby',
+    'Libri',
+    'Bambini'
+  ];
+
   // Modificato: budget senza simbolo €
   final List<String> _budgets = ['0-20', '20-50', '50-100', '100-200', '200+'];
 
@@ -75,19 +101,19 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
   void _generateGiftIdeas() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<GiftIdeasBloc>().add(
-        GenerateGiftIdeasRequested(
-          name: _nameController.text.trim(),
-          age: _selectedAge.toString(), // Convertito a stringa
-          gender: _selectedGender, // Ora passiamo il genere selezionato
-          relation: _selectedRelation, // Ora è nel formato corretto
-          interests: _selectedInterests,
-          category: _selectedCategory,
-          budget: _selectedBudget, // Senza simbolo €
-        ),
-      );
+            GenerateGiftIdeasRequested(
+              name: _nameController.text.trim(),
+              age: _selectedAge.toString(), // Convertito a stringa
+              gender: _selectedGender, // Ora passiamo il genere selezionato
+              relation: _selectedRelation, // Ora è nel formato corretto
+              interests: _selectedInterests,
+              category: _selectedCategory,
+              budget: _selectedBudget, // Senza simbolo €
+            ),
+          );
     }
   }
-  
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -133,7 +159,7 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: AppTheme.spaceL),
-                    
+
                     // Nome
                     AppTextField(
                       label: 'Nome del destinatario (opzionale)',
@@ -142,31 +168,37 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
                     const SizedBox(height: AppTheme.spaceL),
-                    
+
                     // NUOVO: Genere
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Genere',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         const SizedBox(height: AppTheme.spaceXS),
                         Container(
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.3),
                             ),
-                            borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                            borderRadius:
+                                BorderRadius.circular(AppTheme.borderRadiusM),
                           ),
                           padding: const EdgeInsets.all(AppTheme.spaceM),
                           child: Wrap(
                             spacing: AppTheme.spaceS,
                             runSpacing: AppTheme.spaceS,
                             children: _genderOptions.map((gender) {
-                              final isSelected = _selectedGender == gender['value'];
+                              final isSelected =
+                                  _selectedGender == gender['value'];
                               return ChoiceChip(
                                 label: Text(gender['label']!),
                                 selected: isSelected,
@@ -178,7 +210,10 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                                   });
                                 },
                                 backgroundColor: Colors.transparent,
-                                selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                                selectedColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.2),
                               );
                             }).toList(),
                           ),
@@ -186,19 +221,20 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       ],
                     ),
                     const SizedBox(height: AppTheme.spaceL),
-                    
+
                     // MODIFICATO: Età specifica invece di range
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Età (approssimativa)',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         const SizedBox(height: AppTheme.spaceXS),
-                        
+
                         // Selettore età con +/-
                         Row(
                           children: [
@@ -214,20 +250,30 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                             ),
                             Expanded(
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: AppTheme.spaceM),
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.3),
                                   ),
-                                  borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                                  borderRadius: BorderRadius.circular(
+                                      AppTheme.borderRadiusM),
                                 ),
                                 child: Text(
                                   _selectedAge.toString(),
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
                                 ),
                               ),
                             ),
@@ -241,7 +287,7 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                             ),
                           ],
                         ),
-                        
+
                         // Età comuni per selezione rapida
                         const SizedBox(height: AppTheme.spaceM),
                         Wrap(
@@ -263,18 +309,20 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       ],
                     ),
                     const SizedBox(height: AppTheme.spaceL),
-                    
+
                     // MODIFICATO: Relazione - ora usa i valori corretti per l'API
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'Relazione',
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                          borderRadius:
+                              BorderRadius.circular(AppTheme.borderRadiusM),
                         ),
                         prefixIcon: const Icon(Icons.people_outline),
                       ),
                       hint: const Text('Seleziona relazione'),
-                      value: _selectedRelation.isEmpty ? null : _selectedRelation,
+                      value:
+                          _selectedRelation.isEmpty ? null : _selectedRelation,
                       items: _relations.map((relation) {
                         return DropdownMenuItem<String>(
                           value: relation,
@@ -294,31 +342,37 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       },
                     ),
                     const SizedBox(height: AppTheme.spaceL),
-                    
+
                     // Interessi - uguale
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Interessi',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         const SizedBox(height: AppTheme.spaceXS),
                         Container(
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.3),
                             ),
-                            borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                            borderRadius:
+                                BorderRadius.circular(AppTheme.borderRadiusM),
                           ),
                           padding: const EdgeInsets.all(AppTheme.spaceM),
                           child: Wrap(
                             spacing: AppTheme.spaceS,
                             runSpacing: AppTheme.spaceS,
                             children: _interests.map((interest) {
-                              final isSelected = _selectedInterests.contains(interest);
+                              final isSelected =
+                                  _selectedInterests.contains(interest);
                               return FilterChip(
                                 label: Text(interest),
                                 selected: isSelected,
@@ -332,13 +386,20 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                                   });
                                 },
                                 backgroundColor: Colors.transparent,
-                                selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                                selectedColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.2),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                                  borderRadius: BorderRadius.circular(
+                                      AppTheme.borderRadiusM),
                                   side: BorderSide(
                                     color: isSelected
                                         ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withOpacity(0.3),
                                   ),
                                 ),
                                 showCheckmark: false,
@@ -364,18 +425,20 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       ],
                     ),
                     const SizedBox(height: AppTheme.spaceL),
-                    
+
                     // Categoria - uguale
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'Categoria',
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                          borderRadius:
+                              BorderRadius.circular(AppTheme.borderRadiusM),
                         ),
                         prefixIcon: const Icon(Icons.category_outlined),
                       ),
                       hint: const Text('Seleziona categoria'),
-                      value: _selectedCategory.isEmpty ? null : _selectedCategory,
+                      value:
+                          _selectedCategory.isEmpty ? null : _selectedCategory,
                       items: _categories.map((category) {
                         return DropdownMenuItem<String>(
                           value: category,
@@ -395,13 +458,14 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       },
                     ),
                     const SizedBox(height: AppTheme.spaceL),
-                    
+
                     // MODIFICATO: Budget - senza simbolo €
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'Budget',
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                          borderRadius:
+                              BorderRadius.circular(AppTheme.borderRadiusM),
                         ),
                         prefixIcon: const Icon(Icons.euro_outlined),
                       ),
@@ -426,7 +490,7 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
                       },
                     ),
                     const SizedBox(height: AppTheme.spaceXL),
-                    
+
                     // Pulsante di generazione
                     AppButton(
                       text: 'Genera Idee Regalo',
