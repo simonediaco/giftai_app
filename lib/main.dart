@@ -1,70 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'core/config/app_config.dart';
-import 'core/theme/app_theme.dart';
-import 'core/navigation/main_layout.dart';
-import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/auth/presentation/pages/login_page.dart';
-import 'features/auth/presentation/pages/register_page.dart';
-import 'features/auth/presentation/pages/splash_page.dart';
-import 'features/gift_ideas/presentation/bloc/gift_ideas_bloc.dart';
-import 'features/gift_ideas/presentation/pages/gift_wizard_page.dart';
-import 'features/saved_gifts/presentation/bloc/saved_gifts_bloc.dart';
-import 'features/recipients/presentation/bloc/recipients_bloc.dart';
-import 'shared/di/injection.dart';
-
+import 'package:giftai/blocs/auth/auth_bloc.dart';
+import 'package:giftai/blocs/auth/auth_event.dart';
+import 'package:giftai/blocs/gift/gift_bloc.dart';
+import 'package:giftai/blocs/history/history_bloc.dart';
+import 'package:giftai/blocs/recipient/recipient_bloc.dart';
+import 'package:giftai/screens/auth/splash_screen.dart';
+import 'package:giftai/services/firebase_service.dart';
+import 'package:giftai/services/service_locator.dart';
+import 'package:giftai/themes/app_theme.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Inizializza la configurazione dell'app
-  AppConfig(
-    apiBaseUrl: 'http://localhost:8000',
-    environment: Environment.dev,
-    enableLogging: true,
-  );
+  // Inizializza il service locator
+  await setupServiceLocator();
   
-  // Inizializza le dipendenze
-  await initializeDependencies();
+  // Inizializza Firebase
+  // try {
+  //   await FirebaseService.initialize();
+  //   print('Firebase inizializzato con successo');
+  // } catch (e) {
+  //   print('Errore nell\'inizializzazione di Firebase: $e');
+  //   print('L\'app continuerà senza le funzionalità Firebase');
+  // }
   
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>(
-          create: (context) => getIt<AuthBloc>(),
+          create: (context) => AuthBloc(
+            authRepository: getIt.get(),
+          )..add(AuthCheckRequested()),
         ),
-        BlocProvider<GiftIdeasBloc>(
-          create: (context) => getIt<GiftIdeasBloc>(),
+        BlocProvider<RecipientBloc>(
+          create: (context) => RecipientBloc(
+            recipientRepository: getIt.get(),
+          ),
         ),
-        BlocProvider<SavedGiftsBloc>(
-          create: (context) => getIt<SavedGiftsBloc>(),
+        BlocProvider<GiftBloc>(
+          create: (context) => GiftBloc(
+            giftRepository: getIt.get(),
+          ),
         ),
-        BlocProvider<RecipientsBloc>( // Aggiungi questo
-          create: (context) => getIt<RecipientsBloc>(),
+        BlocProvider<HistoryBloc>(
+          create: (context) => HistoryBloc(
+            historyRepository: getIt.get(),
+          ),
         ),
       ],
       child: MaterialApp(
         title: 'GiftAI',
-        theme: AppTheme.lightTheme(),
-        darkTheme: AppTheme.darkTheme(),
-        themeMode: ThemeMode.system,
         debugShowCheckedModeBanner: false,
-        initialRoute: SplashPage.routeName,
-        routes: {
-          SplashPage.routeName: (context) => const SplashPage(),
-          LoginPage.routeName: (context) => const LoginPage(),
-          RegisterPage.routeName: (context) => const RegisterPage(),
-          MainLayout.routeName: (context) => const MainLayout(),
-          GiftWizardPage.routeName: (context) => const GiftWizardPage(),
-        },
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('it', 'IT'),
+          Locale('en', 'US'),
+        ],
+        home: const SplashScreen(),
       ),
     );
   }
