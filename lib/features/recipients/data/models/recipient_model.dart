@@ -1,6 +1,17 @@
+import 'package:hive/hive.dart';
 import '../../domain/entities/recipient.dart';
 
+@HiveType(typeId: 0)
 class RecipientModel extends Recipient {
+  static RecipientModel fromEntity(Recipient recipient) => RecipientModel(
+    id: recipient.id,
+    name: recipient.name,
+    gender: recipient.gender,
+    birthDate: recipient.birthDate,
+    relation: recipient.relation,
+    interests: recipient.interests,
+    notes: recipient.notes,
+  );
   const RecipientModel({
     required int id,
     required String name,

@@ -1,4 +1,4 @@
-// lib/features/home/presentation/pages/home_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,346 +7,372 @@ import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../../features/gift_ideas/presentation/pages/gift_wizard_page.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../recipients/presentation/bloc/recipients_bloc.dart';
+import '../../../recipients/presentation/bloc/recipients_event.dart';
+import '../../../recipients/presentation/bloc/recipients_state.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   static const routeName = '/home';
-  
+
   const HomePage({Key? key}) : super(key: key);
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+
+  @override
+  @override
+  void initState() {
+    super.initState();
+    // Fetch recipients when page loads
+    context.read<RecipientsBloc>().add(FetchRecipients());
+  }
+
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state is Authenticated) {
           return Scaffold(
-            body: SafeArea(
-              child: CustomScrollView(
-                slivers: [
-                  // Header personalizzato
-                  SliverToBoxAdapter(
-                    child: Container(
-                      padding: const EdgeInsets.all(AppTheme.spaceL),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Theme.of(context).colorScheme.primary,
-                            Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                          ],
-                        ),
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(30),
-                          bottomRight: Radius.circular(30),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Saluto
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 25,
-                                backgroundColor: Colors.white.withOpacity(0.3),
-                                child: Text(
-                                  state.user.name?.substring(0, 1).toUpperCase() ?? 'U',
-                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: AppTheme.spaceM),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Ciao, ${state.user.name ?? 'Utente'}!',
-                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Benvenuto in GiftAI',
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: Colors.white.withOpacity(0.9),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.notifications_outlined),
-                                color: Colors.white,
-                                onPressed: () {
-                                  // TODO: Implementare notifiche
-                                },
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppTheme.spaceXL),
-                          
-                          // Call to action principale
-                          Container(
-                            padding: const EdgeInsets.all(AppTheme.spaceL),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Scopri il regalo perfetto',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: AppTheme.spaceS),
-                                Text(
-                                  'Utilizziamo l\'intelligenza artificiale per trovare idee regalo personalizzate',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                const SizedBox(height: AppTheme.spaceM),
-                                AppButton(
-                                  text: 'Inizia ora',
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => const GiftWizardPage(),
-                                      ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.card_giftcard),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+            appBar: AppBar(
+              title: const Text(''),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () {
+                    // Handle notifications
+                  },
+                ),
+                IconButton(
+                  icon: CircleAvatar(
+                    radius: 15,
+                    backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+                    child: Text(
+                      state.user.name?.substring(0, 1).toUpperCase() ?? 'U',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  
-                  // Sezione statistiche
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppTheme.spaceL),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Le tue statistiche',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                          const SizedBox(height: AppTheme.spaceM),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  icon: Icons.search,
-                                  title: '5',
-                                  subtitle: 'Ricerche',
-                                  color: Colors.blue,
-                                ),
-                              ),
-                              const SizedBox(width: AppTheme.spaceM),
-                              Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  icon: Icons.favorite,
-                                  title: '3',
-                                  subtitle: 'Salvati',
-                                  color: Colors.red,
-                                ),
-                              ),
-                              const SizedBox(width: AppTheme.spaceM),
-                              Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  icon: Icons.person,
-                                  title: '2',
-                                  subtitle: 'Destinatari',
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  // Sezione categorie popolari
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppTheme.spaceL),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Categorie popolari',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                          const SizedBox(height: AppTheme.spaceM),
-                          SizedBox(
-                            height: 120,
-                            child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: [
-                                _buildCategoryCard(context, 'Tech', Icons.devices, Colors.blue),
-                                _buildCategoryCard(context, 'Moda', Icons.shopping_bag, Colors.purple),
-                                _buildCategoryCard(context, 'Casa', Icons.home, Colors.green),
-                                _buildCategoryCard(context, 'Sport', Icons.sports_soccer, Colors.orange),
-                                _buildCategoryCard(context, 'Hobby', Icons.palette, Colors.red),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  // Sezione consigli e suggerimenti
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppTheme.spaceL),
-                      child: Container(
-                        padding: const EdgeInsets.all(AppTheme.spaceL),
+                  onPressed: () {
+                    // Navigate to profile
+                  },
+                ),
+              ],
+            ),
+            body: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Welcome Section with Image
+                  Stack(
+                    children: [
+                      Container(
+                        height: 200,
+                        width: double.infinity,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Colors.purple.shade300,
-                              Colors.purple.shade600,
-                            ],
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/img-home.png'),
+                            fit: BoxFit.cover,
                           ),
-                          borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
                         ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                theme.scaffoldBackgroundColor.withOpacity(0.8),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 20,
+                        left: 20,
+                        right: 20,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.lightbulb, color: Colors.yellow),
-                                const SizedBox(width: AppTheme.spaceS),
-                                Text(
-                                  'Suggerimento del giorno',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppTheme.spaceM),
                             Text(
-                              'Per un regalo più significativo, considera sempre gli interessi e le passioni della persona a cui stai facendo il regalo.',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white,
-                                  ),
+                              'Hi ${state.user.name ?? ''}!',
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                color: theme.colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'Who would you like to gift today?',
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: theme.colorScheme.onPrimary,
+                              ),
                             ),
                           ],
                         ),
                       ),
+                    ],
+                  ),
+
+                  // Generate Gift Button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL),
+                    child: Container(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const GiftWizardPage(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+                          ),
+                        ),
+                        child: Text(
+                          'Genera un Regalo',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spaceL),
+
+                  // Recipients Quick Access
+                  BlocBuilder<RecipientsBloc, RecipientsState>(
+                    builder: (context, state) {
+                      print('Recipients state: $state'); // Debug log
+
+                      if (state is RecipientsLoading) {
+                        return const Padding(
+                          padding: EdgeInsets.all(AppTheme.spaceL),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      if (state is RecipientsError) {
+                        return Padding(
+                          padding: const EdgeInsets.all(AppTheme.spaceL),
+                          child: Center(child: Text('Errore: ${state.message}')),
+                        );
+                      }
+
+                      if (state is RecipientsLoaded) {
+                        print('Recipients loaded: ${state.recipients.length}'); // Debug log
+                        if (state.recipients.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.all(AppTheme.spaceL),
+                            child: Center(child: Text('Nessun destinatario trovato')),
+                          );
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.all(AppTheme.spaceL),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'I tuoi destinatari',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: AppTheme.spaceM),
+                              SizedBox(
+                                height: 100,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: state.recipients.length,
+                                  itemBuilder: (context, index) {
+                                    final recipient = state.recipients[index];
+                                    return _buildRecipientCard(
+                                      context,
+                                      name: recipient.name,
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: Text('Conferma Dettagli'),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Destinatario: ${recipient.name}'),
+                                                const SizedBox(height: AppTheme.spaceXS),
+                                                Text('Età: ${DateTime.now().year - recipient.birthDate.year}'),
+                                                const SizedBox(height: AppTheme.spaceXS),
+                                                Text('Interessi: ${recipient.interests.join(", ")}'),
+                                              ],
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context),
+                                                child: Text('Modifica'),
+                                              ),
+                                              FilledButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) => GiftWizardPage(
+                                                        initialRecipient: recipient,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                                child: Text('Conferma'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+
+                  // Popular Gifts
+                  Padding(
+                    padding: const EdgeInsets.all(AppTheme.spaceL),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Regali popolari',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: AppTheme.spaceM),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _popularGifts.length,
+                          itemBuilder: (context, index) {
+                            final gift = _popularGifts[index];
+                            return _buildGiftCard(context, gift);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
+
+        );
         }
+        return const Center(child: CircularProgressIndicator());
       },
     );
   }
 
-  Widget _buildStatCard(BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color color,
+  Widget _buildRecipientCard(
+    BuildContext context, {
+    required String name,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(AppTheme.spaceM),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(height: AppTheme.spaceXS),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-          ),
-          Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryCard(BuildContext context, String title, IconData icon, Color color) {
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(right: AppTheme.spaceM),
-      width: 100,
       child: InkWell(
-        onTap: () {
-          // TODO: Navigare alla ricerca per categoria
-        },
+        onTap: onTap,
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppTheme.spaceM),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: color.withOpacity(0.3),
-                ),
+        child: Container(
+          width: 80,
+          padding: const EdgeInsets.all(AppTheme.spaceM),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                child: Text(name[0]),
               ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 28,
+              const SizedBox(height: AppTheme.spaceXS),
+              Text(
+                name,
+                style: Theme.of(context).textTheme.bodyMedium,
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            const SizedBox(height: AppTheme.spaceS),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+
+  Widget _buildGiftCard(BuildContext context, PopularGift gift) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppTheme.spaceM),
+      child: ListTile(
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+          child: Image.network(
+            gift.imageUrl,
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
+          ),
+        ),
+        title: Text(gift.name),
+        subtitle: Text('\$${gift.price.toStringAsFixed(2)}'),
+        trailing: IconButton(
+          icon: const Icon(Icons.shopping_cart_outlined),
+          onPressed: () {
+            // Open Amazon affiliate link
+          },
+        ),
+      ),
+    );
+  }
+
+  static final List<PopularGift> _popularGifts = [
+    PopularGift(
+      name: 'Wireless Earbuds',
+      price: 129.99,
+      imageUrl: 'https://m.media-amazon.com/images/I/51R8U4qEfAL._AC_SL1500_.jpg',
+    ),
+    PopularGift(
+      name: 'Smart Watch',
+      price: 199.99,
+      imageUrl: 'https://m.media-amazon.com/images/I/815fRQwqbKL.__AC_SY445_SX342_QL70_ML2_.jpg',
+    ),
+    PopularGift(
+      name: 'Portable Speaker',
+      price: 79.99,
+      imageUrl: 'https://m.media-amazon.com/images/I/71hwhYM7DiL.__AC_SX300_SY300_QL70_ML2_.jpg',
+    ),
+  ];
+}
+
+class PopularGift {
+  final String name;
+  final double price;
+  final String imageUrl;
+
+  PopularGift({
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+  });
 }

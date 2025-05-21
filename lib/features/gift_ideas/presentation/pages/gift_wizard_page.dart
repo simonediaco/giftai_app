@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../recipients/domain/entities/recipient.dart';
 import '../bloc/gift_ideas_bloc.dart';
 import '../bloc/gift_ideas_event.dart';
 import '../bloc/gift_ideas_state.dart';
@@ -18,8 +19,8 @@ import '../widgets/wizard_steps/step_relation.dart';
 
 class GiftWizardPage extends StatefulWidget {
   static const routeName = '/gift-wizard';
-  
-  const GiftWizardPage({Key? key}) : super(key: key);
+
+  const GiftWizardPage({Key? key, Recipient? initialRecipient}) : super(key: key);
 
   @override
   State<GiftWizardPage> createState() => _GiftWizardPageState();
@@ -30,7 +31,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
   int _currentStep = 0;
   late PageController _pageController;
   late AnimationController _animationController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -40,14 +41,14 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
       duration: const Duration(milliseconds: 300),
     );
   }
-  
+
   @override
   void dispose() {
     _pageController.dispose();
     _animationController.dispose();
     super.dispose();
   }
-  
+
   void _nextStep() {
     if (_currentStep < 6) {
       setState(() {
@@ -58,7 +59,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
-      
+
       // Se siamo all'ultimo step, avviamo la generazione
       if (_currentStep == 6) {
         context.read<GiftIdeasBloc>().add(
@@ -75,7 +76,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
       }
     }
   }
-  
+
   void _previousStep() {
     if (_currentStep > 0) {
       setState(() {
@@ -90,7 +91,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
       Navigator.of(context).pop();
     }
   }
-  
+
   String _getStepTitle() {
     switch (_currentStep) {
       case 0:
@@ -136,7 +137,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
               wizardData: _wizardData,
             );
           }
-          
+
           return SafeArea(
             child: Column(
               children: [
@@ -165,7 +166,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
                     ],
                   ),
                 ),
-                
+
                 // Titolo dello step corrente
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -180,7 +181,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
                     textAlign: TextAlign.center,
                   ),
                 ),
-                
+
                 // Contenuto dello step
                 Expanded(
                   child: PageView(
@@ -192,37 +193,37 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
-                      
+
                       // Step 2: Genere
                       StepGender(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
-                      
+
                       // Step 3: Relazione
                       StepRelation(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
-                      
+
                       // Step 4: Interessi
                       StepInterests(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
-                      
+
                       // Step 5: Categoria
                       StepCategory(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
-                      
+
                       // Step 6: Budget
                       StepBudget(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
-                      
+
                       // Step 7: Loading
                       const StepLoading(),
                     ],

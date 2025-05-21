@@ -32,7 +32,7 @@ class _MainLayoutState extends State<MainLayout> {
   
   final List<Widget> _pages = [
     const HomePage(),
-    const RecipientsPage(),
+    const GiftWizardPage(),
     const SavedGiftsPage(),
     const ProfilePage(),
   ];
@@ -41,20 +41,19 @@ class _MainLayoutState extends State<MainLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages[_currentIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Theme.of(context).scaffoldBackgroundColor,
         ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            border: Border(
+              top: BorderSide(
+                color: Theme.of(context).colorScheme.onBackground.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
           ),
           child: BottomNavigationBar(
             currentIndex: _currentIndex,
@@ -64,60 +63,32 @@ class _MainLayoutState extends State<MainLayout> {
               });
             },
             selectedItemColor: Theme.of(context).colorScheme.primary,
-            unselectedItemColor: Colors.grey,
+            unselectedItemColor: Theme.of(context).colorScheme.onBackground.withOpacity(0.5),
             showUnselectedLabels: true,
             selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
             elevation: 0,
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             type: BottomNavigationBarType.fixed,
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
+                icon: Icon(Icons.home_outlined, size: 22),
+                activeIcon: Icon(Icons.home_rounded, size: 22),
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.people_outline),
-                activeIcon: Icon(Icons.people),
-                label: 'Destinatari',
+                icon: Icon(Icons.card_giftcard_outlined, size: 22),
+                activeIcon: Icon(Icons.card_giftcard_rounded, size: 22),
+                label: 'New Gift',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.favorite_outline),
-                activeIcon: Icon(Icons.favorite),
-                label: 'Salvati',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
-                label: 'Profilo',
+                icon: Icon(Icons.history_rounded, size: 22),
+                activeIcon: Icon(Icons.history_rounded, size: 22),
+                label: 'History',
               ),
             ],
           ),
         ),
       ),
-      // FAB contestuale a seconda della pagina
-      floatingActionButton: _buildFloatingActionButton(),
-    );
-  }
-  
-  Widget? _buildFloatingActionButton() {
-    // Mostra FAB solo in certe pagine
-    switch (_currentIndex) {
-      case 0: // Home
-        return FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => const GiftWizardPage(),
-            ));
-          },
-          child: const Icon(Icons.card_giftcard),
-          tooltip: 'Trova regalo',
-        );
-      case 1: // Destinatari
-        // Usiamo già il FAB nella pagina Destinatari
-        return null;
-      default:
-        return null;
-    }
+      );
   }
 }

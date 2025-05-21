@@ -13,21 +13,25 @@ import 'features/gift_ideas/presentation/pages/gift_wizard_page.dart';
 import 'features/saved_gifts/presentation/bloc/saved_gifts_bloc.dart';
 import 'features/recipients/presentation/bloc/recipients_bloc.dart';
 import 'shared/di/injection.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'features/recipients/data/models/recipient_model.dart';
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Inizializza la configurazione dell'app
   AppConfig(
     apiBaseUrl: 'http://localhost:8000',
     environment: Environment.dev,
     enableLogging: true,
   );
-  
+
   // Inizializza le dipendenze
   await initializeDependencies();
-  
+
+  await Hive.initFlutter();
+
   runApp(const MyApp());
 }
 
@@ -63,7 +67,7 @@ class MyApp extends StatelessWidget {
           LoginPage.routeName: (context) => const LoginPage(),
           RegisterPage.routeName: (context) => const RegisterPage(),
           MainLayout.routeName: (context) => const MainLayout(),
-          GiftWizardPage.routeName: (context) => const GiftWizardPage(),
+          // GiftWizardPage.routeName: (context) => const GiftWizardPage(),
         },
       ),
     );

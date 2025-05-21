@@ -37,11 +37,11 @@ class EmptySavedGifts extends StatelessWidget {
             const SizedBox(height: AppTheme.spaceXL),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const GiftWizardPage(),
-                  ),
-                );
+                // Navigator.of(context).push(
+                //   MaterialPageRoute(
+                //     builder: (context) => const GiftWizardPage(),
+                //   ),
+                // );
               },
               icon: const Icon(Icons.search),
               label: const Text('Trova regali'),
