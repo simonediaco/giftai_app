@@ -9,11 +9,10 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import 'register_page.dart';
-import '../../../../features/home/presentation/pages/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   static const routeName = '/login';
-  
+
   const LoginPage({Key? key}) : super(key: key);
 
   @override
@@ -44,8 +43,15 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _navigateToGiftGenerator() {
+    Navigator.of(context).pushNamed('/gift-generator');
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
@@ -55,164 +61,171 @@ class _LoginPageState extends State<LoginPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Theme.of(context).colorScheme.error,
+                backgroundColor: theme.colorScheme.error,
               ),
             );
           }
         },
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppTheme.spaceL),
-              child: Form(
-                key: _formKey,
+        child: Stack(
+          children: [
+            SafeArea(
+              child: SingleChildScrollView(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Logo e Titolo
-                    Image.asset(
-                      'assets/images/logo-02.png',
-                      height: 100,
-                      width: 100,
-                    ),
-                    const SizedBox(height: AppTheme.spaceL),
-                    Text(
-                      'Benvenuto in GiftAI',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppTheme.spaceM),
-                    Text(
-                      'Accedi per trovare il regalo perfetto',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppTheme.spaceXL),
-                    
-                    // Form di Login
-                    AppTextField(
-                      label: 'Email',
-                      hint: 'Inserisci la tua email',
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Inserisci la tua email';
-                        }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                          return 'Inserisci un\'email valida';
-                        }
-                        return null;
-                      },
-                      prefixIcon: const Icon(Icons.email_outlined),
-                    ),
-                    const SizedBox(height: AppTheme.spaceL),
-                    AppTextField(
-                      label: 'Password',
-                      hint: 'Inserisci la tua password',
-                      controller: _passwordController,
-                      obscureText: !_passwordVisible,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Inserisci la tua password';
-                        }
-                        if (value.length < 6) {
-                          return 'La password deve contenere almeno 6 caratteri';
-                        }
-                        return null;
-                      },
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _passwordVisible
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
+                    Container(
+                      width: size.width,
+                      height: size.height * 0.35,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/img-auth.png'),
+                          fit: BoxFit.cover,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _passwordVisible = !_passwordVisible;
-                          });
-                        },
                       ),
                     ),
-                    const SizedBox(height: AppTheme.spaceM),
-                    
-                    // Pulsante Password Dimenticata
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: AppButton(
-                        text: 'Password dimenticata?',
-                        type: AppButtonType.text,
-                        onPressed: () {
-                          // TODO: Implementare recupero password
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: AppTheme.spaceXL),
-                    
-                    // Pulsante Login
-                    BlocBuilder<AuthBloc, AuthState>(
-                      builder: (context, state) {
-                        return AppButton(
-                          text: 'Accedi',
-                          isLoading: state is AuthLoading,
-                          onPressed: _login,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: AppTheme.spaceL),
-                    
-                    // Oppure divider
-                    Row(
-                      children: [
-                        const Expanded(child: Divider()),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM),
-                          child: Text(
-                            'oppure',
-                            style: Theme.of(context).textTheme.bodySmall,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: AppTheme.spaceL),
+                          Text(
+                            'Log in',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onBackground,
+                            ),
                           ),
-                        ),
-                        const Expanded(child: Divider()),
-                      ],
-                    ),
-                    const SizedBox(height: AppTheme.spaceL),
-                    
-                    // Pulsante generazione veloce
-                    AppButton(
-                      text: 'Genera un regalo velocemente',
-                      type: AppButtonType.secondary,
-                      onPressed: () {
-                        // TODO: Navigare alla pagina di generazione rapida
-                      },
-                    ),
-                    const SizedBox(height: AppTheme.spaceXL),
-                    
-                    // Link per registrazione
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Non hai un account?',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        AppButton(
-                          text: 'Registrati',
-                          type: AppButtonType.text,
-                          onPressed: () {
-                            Navigator.of(context).pushNamed(RegisterPage.routeName);
-                          },
-                        ),
-                      ],
+                          const SizedBox(height: AppTheme.spaceM),
+                          Text(
+                            "Welcome back! Please enter your details.",
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onBackground.withOpacity(0.7),
+                            ),
+                          ),
+                          const SizedBox(height: AppTheme.spaceXL),
+                          Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                AppTextField(
+                                  label: 'Email',
+                                  hint: 'Enter your email',
+                                  controller: _emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter your email';
+                                    }
+                                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                      return 'Please enter a valid email';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: AppTheme.spaceL),
+                                AppTextField(
+                                  label: 'Password',
+                                  hint: 'Enter your password',
+                                  controller: _passwordController,
+                                  obscureText: !_passwordVisible,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter your password';
+                                    }
+                                    if (value.length < 6) {
+                                      return 'Password must be at least 6 characters';
+                                    }
+                                    return null;
+                                  },
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _passwordVisible ? Icons.visibility_off : Icons.visibility,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _passwordVisible = !_passwordVisible;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: AppTheme.spaceM),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed: () {
+                                      // Implement forgot password
+                                    },
+                                    child: Text(
+                                      'Forgot password?',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: AppTheme.spaceXL),
+                                BlocBuilder<AuthBloc, AuthState>(
+                                  builder: (context, state) {
+                                    return AppButton(
+                                      text: 'Login',
+                                      type: AppButtonType.primary,
+                                      isLoading: state is AuthLoading,
+                                      onPressed: _login,
+                                      height: 50,
+                                      borderRadius: AppTheme.borderRadiusL,
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: AppTheme.spaceL),
+                                AppButton(
+                                  text: 'Generate a Gift',
+                                  type: AppButtonType.secondary,
+                                  onPressed: () {
+                                    Navigator.of(context).pushNamed('/gift-wizard');
+                                  },
+                                  height: 50,
+                                  borderRadius: AppTheme.borderRadiusL,
+                                ),
+                                const SizedBox(height: AppTheme.spaceL),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Don't have an account? ",
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: theme.colorScheme.onBackground.withOpacity(0.7),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(RegisterPage.routeName);
+                                      },
+                                      child: Text(
+                                        'Sign up',
+                                        style: TextStyle(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppTheme.spaceXXL),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

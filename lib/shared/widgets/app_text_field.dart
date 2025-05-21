@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -39,14 +40,17 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onBackground.withOpacity(0.7),
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: AppTheme.spaceXS),
         TextFormField(
@@ -60,41 +64,55 @@ class AppTextField extends StatelessWidget {
           readOnly: readOnly,
           maxLines: maxLines,
           minLines: minLines,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onBackground,
+          ),
           decoration: InputDecoration(
             hintText: hint,
+            hintStyle: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onBackground.withOpacity(0.5),
+            ),
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
-            contentPadding: contentPadding ?? const EdgeInsets.all(AppTheme.spaceM),
+            filled: true,
+            fillColor: theme.colorScheme.surface.withOpacity(0.06),
+            contentPadding: contentPadding ?? const EdgeInsets.symmetric(
+              horizontal: AppTheme.spaceL,
+              vertical: AppTheme.spaceM,
+            ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
               borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                color: theme.colorScheme.onBackground.withOpacity(0.1),
+                width: 1,
               ),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
               borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                color: theme.colorScheme.onBackground.withOpacity(0.1),
+                width: 1,
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
               borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2,
+                color: theme.colorScheme.primary.withOpacity(0.5),
+                width: 1,
               ),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
               borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.error,
+                color: theme.colorScheme.error.withOpacity(0.5),
+                width: 1,
               ),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
               borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.error,
-                width: 2,
+                color: theme.colorScheme.error,
+                width: 1,
               ),
             ),
           ),

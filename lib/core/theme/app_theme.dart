@@ -2,25 +2,25 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Colori primari
-  static const Color primaryColor = Color(0xFF6200EE);
-  static const Color primaryVariantColor = Color(0xFF3700B3);
-  static const Color secondaryColor = Color(0xFF03DAC6);
-  static const Color secondaryVariantColor = Color(0xFF018786);
-  
+  static const Color primaryColor = Color(0xFFE040FB); // Fucsia accent
+  static const Color primaryVariantColor = Color(0xFFD500F9);
+  static const Color secondaryColor = Color(0xFFAB47BC); // Viola chiaro
+  static const Color secondaryVariantColor = Color(0xFF9C27B0);
+
   // Colori di background
+  static const Color backgroundDark = Color(0xFF1A1A2E); // Blu scuro
   static const Color backgroundLight = Color(0xFFF5F5F5);
-  static const Color backgroundDark = Color(0xFF121212);
-  
+
   // Colori di superficie
+  static const Color surfaceDark = Color(0xFF16213E); // Blu scuro più chiaro
   static const Color surfaceLight = Colors.white;
-  static const Color surfaceDark = Color(0xFF1E1E1E);
-  
+
   // Colori di errore
-  static const Color errorColor = Color(0xFFB00020);
-  
+  static const Color errorColor = Color(0xFFCF6679);
+
   // Colori di testo
-  static const Color textPrimaryLight = Color(0xFF212121);
-  static const Color textSecondaryLight = Color(0xFF757575);
+  static const Color textPrimaryLight = Color(0xFFF8F9FA);
+  static const Color textSecondaryLight = Color(0xFFB0B3B8);
   static const Color textPrimaryDark = Color(0xFFE1E1E1);
   static const Color textSecondaryDark = Color(0xFFAEAEAE);
 
@@ -44,23 +44,24 @@ class AppTheme {
   static const double elevationL = 8.0;
   static const double elevationXL = 16.0;
 
-  static ThemeData lightTheme() {
+  static ThemeData darkTheme() {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: const ColorScheme.light(
+      brightness: Brightness.dark,
+      colorScheme: const ColorScheme.dark(
         primary: primaryColor,
         onPrimary: Colors.white,
         primaryContainer: primaryVariantColor,
         secondary: secondaryColor,
-        onSecondary: Colors.black,
+        onSecondary: Colors.white,
         secondaryContainer: secondaryVariantColor,
-        background: backgroundLight,
-        surface: surfaceLight,
+        background: backgroundDark,
+        surface: surfaceDark,
         error: errorColor,
       ),
-      scaffoldBackgroundColor: backgroundLight,
+      scaffoldBackgroundColor: backgroundDark,
       appBarTheme: const AppBarTheme(
-        color: primaryColor,
+        color: surfaceDark,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -79,12 +80,31 @@ class AppTheme {
         bodySmall: TextStyle(color: textSecondaryLight),
         labelLarge: TextStyle(color: primaryColor),
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surfaceDark.withOpacity(0.5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadiusL),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadiusL),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadiusL),
+          borderSide: BorderSide(
+            color: primaryColor.withOpacity(0.5),
+            width: 1,
+          ),
+        ),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: Colors.white,
           backgroundColor: primaryColor,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusM),
+            borderRadius: BorderRadius.circular(borderRadiusL),
           ),
           padding: const EdgeInsets.symmetric(
             horizontal: spaceXL,
@@ -92,59 +112,10 @@ class AppTheme {
           ),
         ),
       ),
-      // Aggiungi altri stili per button, input, card, ecc.
     );
   }
 
-  static ThemeData darkTheme() {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: const ColorScheme.dark(
-        primary: primaryColor,
-        onPrimary: Colors.white,
-        primaryContainer: primaryVariantColor,
-        secondary: secondaryColor,
-        onSecondary: Colors.black,
-        secondaryContainer: secondaryVariantColor,
-        background: backgroundDark,
-        surface: surfaceDark,
-        error: errorColor,
-      ),
-      scaffoldBackgroundColor: backgroundDark,
-      appBarTheme: const AppBarTheme(
-        color: surfaceDark,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      fontFamily: 'Poppins',
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(color: textPrimaryDark),
-        displayMedium: TextStyle(color: textPrimaryDark),
-        displaySmall: TextStyle(color: textPrimaryDark),
-        headlineMedium: TextStyle(color: textPrimaryDark),
-        headlineSmall: TextStyle(color: textPrimaryDark),
-        titleLarge: TextStyle(color: textPrimaryDark),
-        titleMedium: TextStyle(color: textPrimaryDark),
-        titleSmall: TextStyle(color: textPrimaryDark),
-        bodyLarge: TextStyle(color: textPrimaryDark),
-        bodyMedium: TextStyle(color: textPrimaryDark),
-        bodySmall: TextStyle(color: textSecondaryDark),
-        labelLarge: TextStyle(color: primaryColor),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white,
-          backgroundColor: primaryColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusM),
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: spaceXL,
-            vertical: spaceM,
-          ),
-        ),
-      ),
-      // Aggiungi altri stili per il tema dark
-    );
+  static ThemeData lightTheme() {
+    return darkTheme(); // Per ora usiamo sempre il tema scuro
   }
 }

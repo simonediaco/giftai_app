@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
-enum AppButtonType { primary, secondary, text }
+enum AppButtonType { primary, secondary, text, outlined }
 
 class AppButton extends StatelessWidget {
   final String text;
