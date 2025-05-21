@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:giftai/models/gift_model.dart';
 
+import '../../models/gift_model.dart';
+
+/// Base class for all gift states
 abstract class GiftState extends Equatable {
   const GiftState();
 
@@ -8,106 +10,130 @@ abstract class GiftState extends Equatable {
   List<Object?> get props => [];
 }
 
-class GiftInitial extends GiftState {}
+/// Initial state
+class GiftInitialState extends GiftState {}
 
+/// Loading state (alias per compatibilità con codice esistente)
+class GiftLoadingState extends GiftState {}
 class GiftLoading extends GiftState {}
 
-class GiftGenerateSuccess extends GiftState {
-  final List<GiftModel> gifts;
+/// State when gift ideas are successfully loaded
+class GiftIdeasLoadedState extends GiftState {
+  final List<Gift> gifts;
 
-  const GiftGenerateSuccess({required this.gifts});
+  const GiftIdeasLoadedState(this.gifts);
 
   @override
   List<Object> get props => [gifts];
 }
 
-class GiftGenerateFailure extends GiftState {
+/// Alias per compatibilità con codice esistente
+class GiftGenerateSuccess extends GiftState {
+  final List<Gift> gifts;
+
+  const GiftGenerateSuccess(this.gifts);
+
+  @override
+  List<Object> get props => [gifts];
+}
+
+/// State when a gift is successfully saved
+class GiftSavedState extends GiftState {
+  final Gift gift;
+
+  const GiftSavedState(this.gift);
+
+  @override
+  List<Object> get props => [gift];
+}
+
+/// State when saved gifts are successfully loaded (e alias per compatibilità)
+class SavedGiftsLoadedState extends GiftState {
+  final List<Gift> gifts;
+
+  const SavedGiftsLoadedState(this.gifts);
+
+  @override
+  List<Object> get props => [gifts];
+}
+class GiftSavedLoadSuccess extends GiftState {
+  final List<Gift> gifts;
+
+  const GiftSavedLoadSuccess(this.gifts);
+
+  @override
+  List<Object> get props => [gifts];
+}
+
+/// State when a specific saved gift is successfully loaded
+class SavedGiftLoadedState extends GiftState {
+  final Gift gift;
+
+  const SavedGiftLoadedState(this.gift);
+
+  @override
+  List<Object> get props => [gift];
+}
+
+/// Alias for SavedGiftLoadedState (per compatibilità codice esistente)
+class GiftSavedDetailSuccess extends GiftState {
+  final Gift gift;
+
+  const GiftSavedDetailSuccess(this.gift);
+
+  @override
+  List<Object> get props => [gift];
+}
+
+/// State when a gift is successfully deleted
+class GiftDeletedState extends GiftState {
+  final int giftId;
+
+  const GiftDeletedState(this.giftId);
+
+  @override
+  List<Object> get props => [giftId];
+}
+
+/// State when a gift is successfully updated
+class GiftUpdatedState extends GiftState {
+  final Gift gift;
+
+  const GiftUpdatedState(this.gift);
+
+  @override
+  List<Object> get props => [gift];
+}
+
+/// Error state (e alias per compatibilità)
+class GiftErrorState extends GiftState {
   final String message;
 
-  const GiftGenerateFailure({required this.message});
+  const GiftErrorState(this.message);
 
   @override
   List<Object> get props => [message];
 }
-
-class GiftSavedLoadSuccess extends GiftState {
-  final List<GiftModel> gifts;
-
-  const GiftSavedLoadSuccess({required this.gifts});
-
-  @override
-  List<Object> get props => [gifts];
-}
-
 class GiftSavedLoadFailure extends GiftState {
   final String message;
 
-  const GiftSavedLoadFailure({required this.message});
+  const GiftSavedLoadFailure(this.message);
 
   @override
   List<Object> get props => [message];
 }
-
-class GiftSavedDetailSuccess extends GiftState {
-  final GiftModel gift;
-
-  const GiftSavedDetailSuccess({required this.gift});
-
-  @override
-  List<Object> get props => [gift];
-}
-
 class GiftSavedDetailFailure extends GiftState {
   final String message;
 
-  const GiftSavedDetailFailure({required this.message});
+  const GiftSavedDetailFailure(this.message);
 
   @override
   List<Object> get props => [message];
 }
-
-class GiftSaveSuccess extends GiftState {
-  final GiftModel gift;
-
-  const GiftSaveSuccess({required this.gift});
-
-  @override
-  List<Object> get props => [gift];
-}
-
-class GiftSaveFailure extends GiftState {
+class GiftGenerateFailure extends GiftState {
   final String message;
 
-  const GiftSaveFailure({required this.message});
-
-  @override
-  List<Object> get props => [message];
-}
-
-class GiftSavedUpdateSuccess extends GiftState {
-  final GiftModel gift;
-
-  const GiftSavedUpdateSuccess({required this.gift});
-
-  @override
-  List<Object> get props => [gift];
-}
-
-class GiftSavedUpdateFailure extends GiftState {
-  final String message;
-
-  const GiftSavedUpdateFailure({required this.message});
-
-  @override
-  List<Object> get props => [message];
-}
-
-class GiftSavedDeleteSuccess extends GiftState {}
-
-class GiftSavedDeleteFailure extends GiftState {
-  final String message;
-
-  const GiftSavedDeleteFailure({required this.message});
+  const GiftGenerateFailure(this.message);
 
   @override
   List<Object> get props => [message];

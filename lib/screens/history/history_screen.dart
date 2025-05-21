@@ -1,280 +1,322 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:giftai/blocs/history/history_bloc.dart';
-import 'package:giftai/blocs/history/history_event.dart';
-import 'package:giftai/blocs/history/history_state.dart';
-import 'package:giftai/models/history_model.dart';
-import 'package:giftai/screens/history/history_detail_screen.dart';
-import 'package:intl/intl.dart';
+import '../../models/gift_model.dart';
+import '../../utils/amazon_affiliate_utils.dart';
+import '../../widgets/empty_state.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  const HistoryScreen({Key? key}) : super(key: key);
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  @override
-  void initState() {
-    super.initState();
-    
-    // Carica la cronologia
-    context.read<HistoryBloc>().add(HistoryFetchRequested());
-  }
-  
-  String _formatTimestamp(DateTime timestamp) {
-    final now = DateTime.now();
-    final difference = now.difference(timestamp);
-    
-    if (difference.inDays < 1) {
-      // Oggi
-      return 'Oggi, ${DateFormat.Hm().format(timestamp)}';
-    } else if (difference.inDays < 2) {
-      // Ieri
-      return 'Ieri, ${DateFormat.Hm().format(timestamp)}';
-    } else if (difference.inDays < 7) {
-      // Questa settimana
-      return DateFormat.EEEE().format(timestamp);
-    } else {
-      // Più di una settimana fa
-      return DateFormat.yMMMd().format(timestamp);
-    }
-  }
-  
-  String _getRequestDescription(HistoryModel history) {
-    final requestData = history.requestData;
-    final List<String> details = [];
-    
-    if (requestData['category'] != null) {
-      details.add('Categoria: ${requestData['category']}');
-    }
-    
-    if (requestData['budget'] != null) {
-      details.add('Budget: ${requestData['budget']}');
-    }
-    
-    if (requestData['name'] != null && requestData['name'].isNotEmpty) {
-      details.add('Per: ${requestData['name']}');
-    } else if (requestData['gender'] != null) {
-      details.add('Per: ${requestData['gender']}');
-    }
-    
-    return details.join(' · ');
-  }
+  // Per ora usiamo dati statici, ma in una versione reale questi verrebbero da un repository
+  final List<HistoryItem> _historyItems = [
+    HistoryItem(
+      date: DateTime.now().subtract(const Duration(days: 2)),
+      recipient: 'Marco',
+      category: 'Tech',
+      budget: '50-100€',
+      gifts: [
+        Gift(
+          name: 'Cuffie Bluetooth',
+          price: 79.99,
+          match: 92,
+          category: 'Tech',
+          description: 'Cuffie wireless con cancellazione del rumore',
+        ),
+        Gift(
+          name: 'Power bank 10000mAh',
+          price: 39.99,
+          match: 88,
+          category: 'Tech',
+          description: 'Caricabatterie portatile ad alta capacità',
+        ),
+      ],
+    ),
+    HistoryItem(
+      date: DateTime.now().subtract(const Duration(days: 7)),
+      recipient: 'Laura',
+      category: 'Bellezza',
+      budget: '20-50€',
+      gifts: [
+        Gift(
+          name: 'Set Makeup L\'Oréal',
+          price: 29.99,
+          match: 95,
+          category: 'Bellezza',
+          description: 'Kit di trucchi completo per ogni occasione',
+        ),
+      ],
+    ),
+    HistoryItem(
+      date: DateTime.now().subtract(const Duration(days: 14)),
+      recipient: 'Carlo',
+      category: 'Sport',
+      budget: '100-200€',
+      gifts: [
+        Gift(
+          name: 'Smartwatch Fitness',
+          price: 149.99,
+          match: 89,
+          category: 'Tech',
+          description: 'Orologio intelligente con monitoraggio attività fisica',
+        ),
+        Gift(
+          name: 'Set abbigliamento running',
+          price: 110.00,
+          match: 85,
+          category: 'Sport',
+          description: 'Completo per la corsa con tecnologia traspirante',
+        ),
+      ],
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cronologia'),
+    if (_historyItems.isEmpty) {
+      return EmptyState(
+        icon: Icons.history,
+        title: 'Nessuna cronologia',
+        message: 'Qui verranno visualizzate le tue ricerche precedenti di idee regalo', actionText: '', onActionPressed: () {  },
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _historyItems.length,
+      itemBuilder: (context, index) {
+        final item = _historyItems[index];
+        return _buildHistoryCard(context, item);
+      },
+    );
+  }
+
+  Widget _buildHistoryCard(BuildContext context, HistoryItem item) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          context.read<HistoryBloc>().add(HistoryFetchRequested());
-        },
-        child: BlocBuilder<HistoryBloc, HistoryState>(
-          builder: (context, state) {
-            if (state is HistoryLoading && state is! HistoryLoadSuccess) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            
-            if (state is HistoryLoadFailure) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Errore: ${state.message}',
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<HistoryBloc>().add(HistoryFetchRequested());
-                      },
-                      child: const Text('Riprova'),
-                    ),
-                  ],
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header con data e destinatario
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _formatDate(item.date),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
-              );
-            }
-            
-            if (state is HistoryLoadSuccess) {
-              if (state.histories.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.history,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Nessuna ricerca nella cronologia',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Le tue ricerche di regali appariranno qui',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          // Vai alla schermata di generazione
-                          DefaultTabController.of(context)?.animateTo(1);
-                        },
-                        icon: const Icon(Icons.auto_awesome),
-                        label: const Text('Genera idee regalo'),
-                      ),
-                    ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                );
-              }
-              
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.histories.length,
-                itemBuilder: (context, index) {
-                  final history = state.histories[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                  child: Text(
+                    'Per ${item.recipient}',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HistoryDetailScreen(
-                              historyId: history.id,
-                            ),
-                          ),
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(16),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                // Icona
-                                CircleAvatar(
-                                  backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                                  child: Icon(
-                                    Icons.search,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                // Timestamp
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        _formatTimestamp(history.timestamp),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        _getRequestDescription(history),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Numero risultati
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    '${history.results.length} risultati',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[800],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            
-                            if (history.results.isNotEmpty) ...[
-                              const SizedBox(height: 16),
-                              
-                              // Miniature dei regali trovati
-                              SizedBox(
-                                height: 80,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: history.results.length > 3 ? 3 : history.results.length,
-                                  itemBuilder: (context, giftIndex) {
-                                    final gift = history.results[giftIndex];
-                                    return Container(
-                                      width: 80,
-                                      height: 80,
-                                      margin: const EdgeInsets.only(right: 8),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        image: DecorationImage(
-                                          image: NetworkImage(
-                                            gift.getFullImageUrl(),
-                                          ),
-                                          fit: BoxFit.cover,
-                                          onError: (exception, stackTrace) {
-                                            // Fallback in caso di errore
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Dettagli della ricerca
+            Row(
+              children: [
+                Icon(
+                  Icons.category,
+                  size: 14,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  item.category,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(width: 16),
+                Icon(
+                  Icons.euro,
+                  size: 14,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  item.budget,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+            
+            const Divider(height: 24),
+            
+            // Lista regali suggeriti
+            ...item.gifts.map((gift) => _buildGiftItem(context, gift)).toList(),
+            
+            // Pulsante per rigenerare
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  // Azione per rigenerare
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Funzionalità in arrivo'),
                     ),
                   );
                 },
-              );
-            }
-            
-            return const SizedBox.shrink();
-          },
+                icon: const Icon(Icons.refresh, size: 16),
+                label: const Text('Rigenera questi suggerimenti'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  Widget _buildGiftItem(BuildContext context, Gift gift) {
+    final amazonUrl = AmazonAffiliateUtils.generateAffiliateLink(gift.name);
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Indicatore di match
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: _getMatchColor(gift.match).withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                '${gift.match}%',
+                style: TextStyle(
+                  color: _getMatchColor(gift.match),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          
+          // Dettagli regalo
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  gift.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      gift.formattedPrice,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Apertura link amazon
+                        _openAmazonLink(amazonUrl);
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text('Vedi su Amazon'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getMatchColor(int match) {
+    if (match >= 90) {
+      return Colors.green;
+    } else if (match >= 75) {
+      return Colors.orange;
+    } else {
+      return Colors.red;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+  
+  void _openAmazonLink(String url) {
+    // In una vera app useresti url_launcher
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Link Amazon'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('In una vera app, l\'URL verrebbe aperto nel browser:'),
+            const SizedBox(height: 12),
+            Text(url, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Chiudi'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class HistoryItem {
+  final DateTime date;
+  final String recipient;
+  final String category;
+  final String budget;
+  final List<Gift> gifts;
+
+  HistoryItem({
+    required this.date,
+    required this.recipient,
+    required this.category,
+    required this.budget,
+    required this.gifts,
+  });
 }

@@ -13,7 +13,7 @@ class RecipientInitial extends RecipientState {}
 class RecipientLoading extends RecipientState {}
 
 class RecipientLoadSuccess extends RecipientState {
-  final List<RecipientModel> recipients;
+  final List<Recipient> recipients;
 
   const RecipientLoadSuccess({required this.recipients});
 
@@ -31,7 +31,7 @@ class RecipientLoadFailure extends RecipientState {
 }
 
 class RecipientDetailSuccess extends RecipientState {
-  final RecipientModel recipient;
+  final Recipient recipient;
 
   const RecipientDetailSuccess({required this.recipient});
 
@@ -49,7 +49,7 @@ class RecipientDetailFailure extends RecipientState {
 }
 
 class RecipientCreateSuccess extends RecipientState {
-  final RecipientModel recipient;
+  final Recipient recipient;
 
   const RecipientCreateSuccess({required this.recipient});
 
@@ -67,7 +67,7 @@ class RecipientCreateFailure extends RecipientState {
 }
 
 class RecipientUpdateSuccess extends RecipientState {
-  final RecipientModel recipient;
+  final Recipient recipient;
 
   const RecipientUpdateSuccess({required this.recipient});
 

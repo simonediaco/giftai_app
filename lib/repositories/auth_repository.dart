@@ -77,12 +77,12 @@ class AuthRepository {
   }
 
   // Ottieni dati utente
-  Future<UserModel?> getUserProfile() async {
+  Future<User?> getUserProfile() async {
     try {
       final response = await _apiClient.get(AppConfig.userProfileEndpoint);
       
       if (response.statusCode == 200) {
-        return UserModel.fromJson(response.data);
+        return User.fromJson(response.data);
       }
       
       return null;

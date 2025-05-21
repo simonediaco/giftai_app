@@ -4,7 +4,7 @@ class HistoryModel {
   final int id;
   final DateTime timestamp;
   final Map<String, dynamic> requestData;
-  final List<GiftModel> results;
+  final List<Gift> results;
 
   HistoryModel({
     required this.id,
@@ -19,7 +19,7 @@ class HistoryModel {
       timestamp: DateTime.parse(json['timestamp']),
       requestData: json['request_data'],
       results: (json['results'] as List)
-          .map((gift) => GiftModel.fromJson(gift))
+          .map((gift) => Gift.fromJson(gift))
           .toList(),
     );
   }

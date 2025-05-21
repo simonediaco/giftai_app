@@ -20,7 +20,7 @@ class RecipientDetailRequested extends RecipientEvent {
 }
 
 class RecipientCreateRequested extends RecipientEvent {
-  final RecipientModel recipient;
+  final Recipient recipient;
 
   const RecipientCreateRequested({required this.recipient});
 
@@ -29,7 +29,7 @@ class RecipientCreateRequested extends RecipientEvent {
 }
 
 class RecipientUpdateRequested extends RecipientEvent {
-  final RecipientModel recipient;
+  final Recipient recipient;
 
   const RecipientUpdateRequested({required this.recipient});
 

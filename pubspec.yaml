@@ -46,11 +46,6 @@ dependencies:
   uuid: ^3.0.7
   image_picker: ^0.8.7+5
   
-  # Firebase
-  # firebase_core: ^2.15.1
-  # firebase_analytics: ^10.4.5
-  # firebase_messaging: ^14.6.7
-  
   # Auth
   google_sign_in: ^6.1.5
   sign_in_with_apple: ^5.0.0
@@ -64,7 +59,6 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.3.2
 
-# AGGIUNGI QUESTA SEZIONE ALLA FINE DEL FILE
 flutter:
   uses-material-design: true
   
@@ -73,21 +67,26 @@ flutter:
     - assets/animations/
     - assets/icons/
 
-  # Configurazione per i font personalizzati, se necessario
-  # fonts:
-  #   - family: Montserrat
-  #     fonts:
-  #       - asset: assets/fonts/Montserrat-Regular.ttf
-  #       - asset: assets/fonts/Montserrat-Bold.ttf
-  #         weight: 700
+  # Configurazione per i font personalizzati
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
 
-# Configurazione per flutter_launcher_icons (opzionale)
+# Configurazione per flutter_native_splash
 flutter_native_splash:
   color: "#ffffff"
   image: assets/images/splash_logo.png
   color_dark: "#121212"
   image_dark: assets/images/splash_logo.png
 
+# Configurazione per flutter_icons
 flutter_icons:
   android: true
   ios: true

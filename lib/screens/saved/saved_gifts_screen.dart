@@ -235,7 +235,7 @@ class _SavedGiftsScreenState extends State<SavedGiftsScreen> {
     );
   }
   
-  List<GiftModel> _filterGifts(List<GiftModel> gifts) {
+  List<Gift> _filterGifts(List<Gift> gifts) {
     // Se non ci sono filtri attivi, restituisci tutti i regali
     if (_selectedCategory == null && _priceRange.start == 0 && _priceRange.end == _maxPrice) {
       return gifts;

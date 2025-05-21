@@ -13,7 +13,7 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 class AuthAuthenticated extends AuthState {
-  final UserModel? user;
+  final User? user;
 
   const AuthAuthenticated({this.user});
 
@@ -44,7 +44,7 @@ class AuthRegistrationFailure extends AuthState {
 }
 
 class AuthProfileUpdateSuccess extends AuthState {
-  final UserModel user;
+  final User user;
 
   const AuthProfileUpdateSuccess({required this.user});
 

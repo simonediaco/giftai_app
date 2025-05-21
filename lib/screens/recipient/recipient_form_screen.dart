@@ -10,7 +10,7 @@ import 'package:giftai/widgets/common/primary_button.dart';
 import 'package:intl/intl.dart';
 
 class RecipientFormScreen extends StatefulWidget {
-  final RecipientModel? recipient;
+  final Recipient? recipient;
 
   const RecipientFormScreen({
     super.key,
@@ -98,7 +98,7 @@ class _RecipientFormScreenState extends State<RecipientFormScreen> {
         _isLoading = true;
       });
       
-      final recipientModel = RecipientModel(
+      final recipientModel = Recipient(
         id: widget.recipient?.id,
         name: data['name'],
         gender: data['gender'],
@@ -214,9 +214,10 @@ class _RecipientFormScreenState extends State<RecipientFormScreen> {
                     labelText: 'Genere',
                   ),
                   options: const [
-                    FormBuilderFieldOption(value: 'maschio', child: Text('Maschio')),
-                    FormBuilderFieldOption(value: 'femmina', child: Text('Femmina')),
-                    FormBuilderFieldOption(value: 'altro', child: Text('Altro')),
+                    FormBuilderFieldOption(value: 'M', child: Text('Maschio')),
+                    FormBuilderFieldOption(value: 'F', child: Text('Femmina')),
+                    FormBuilderFieldOption(value: 'NB', child: Text('Non binario')),
+                    FormBuilderFieldOption(value: 'O', child: Text('Altro')),
                   ],
                 ),
                 

@@ -12,7 +12,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ResultsStep extends StatefulWidget {
-  final List<GiftModel> gifts;
+  final List<Gift> gifts;
   final VoidCallback onBackToHome;
 
   const ResultsStep({
@@ -57,7 +57,7 @@ class _ResultsStepState extends State<ResultsStep> {
     }
   }
   
-  void _shareGift(GiftModel gift) {
+  void _shareGift(Gift gift) {
     Share.share(
       'Ho trovato questo regalo con GiftAI: ${gift.name}\n\nVedi su Amazon: ${gift.getAmazonUrl()}',
       subject: 'Idea regalo da GiftAI',
@@ -69,12 +69,12 @@ class _ResultsStepState extends State<ResultsStep> {
     // );
   }
   
-  void _saveGift(GiftModel gift) {
+  void _saveGift(Gift gift) {
     // Verifica se l'utente è autenticato
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       // Salva il regalo
-      context.read<GiftBloc>().add(GiftSaveRequested(gift: gift));
+      // context.read<GiftBloc>().add(GiftSaveRequested(gift: gift));
       
       // FirebaseService.logEvent(
       //   name: 'save_gift',

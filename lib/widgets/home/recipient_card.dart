@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:giftai/models/recipient_model.dart';
 
 class RecipientCard extends StatelessWidget {
-  final RecipientModel recipient;
+  final Recipient recipient;
   final VoidCallback onTap;
 
   const RecipientCard({
     super.key,
     required this.recipient,
-    required this.onTap,
+    required this.onTap, required void Function() onEdit, required void Function() onDelete,
   });
 
   String _getRelationshipEmoji() {

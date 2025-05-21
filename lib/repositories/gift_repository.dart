@@ -1,154 +1,245 @@
-import 'package:giftai/config/app_config.dart';
-import 'package:giftai/models/gift_model.dart';
-import 'package:giftai/services/api_client.dart';
+import 'dart:convert';
 
+import 'package:dio/dio.dart';
+import '../models/gift_model.dart';
+import '../models/recipient_model.dart';
+import '../utils/translations.dart';
+
+/// Repository responsible for gift-related API calls and data handling
 class GiftRepository {
-  final ApiClient _apiClient;
+  final Dio _dio;
 
-  GiftRepository(this._apiClient);
+  GiftRepository(this._dio);
 
-  // Genera idee regalo senza destinatario
-  Future<List<GiftModel>> generateGiftIdeas({
+  /// Generates gift ideas based on recipient details without saving the recipient
+  /// 
+  /// Takes [name], [age], [gender], [relation], [interests], [category], and [budget]
+  /// Returns a list of [Gift] objects
+  Future<List<Gift>> generateGiftIdeas({
     String? name,
-    int? age,
-    required String gender,
+    dynamic age, // Può essere String? o int?
+    String? gender,
     required String relation,
     required List<String> interests,
     required String category,
     required String budget,
   }) async {
     try {
-      final response = await _apiClient.post(
-        AppConfig.generateGiftIdeasEndpoint,
-        data: {
-          'name': name,
-          'age': age,
-          'gender': gender,
-          'relation': relation,
-          'interests': interests,
-          'category': category,
-          'budget': budget,
-        },
-      );
+      // Converti i valori dell'UI in valori API
+      final String apiRelation = RelationshipTranslations.toApiValue(relation);
+      final String apiCategory = CategoryTranslations.toApiValue(category);
+      final String apiBudget = BudgetTranslations.toApiValue(budget);
+      final String? apiGender = gender != null ? GenderTranslations.toApiValue(gender) : null;
       
-     if (response.statusCode == 200 && response.data['results'] != null) {
-          return (response.data['results'] as List)
-              .map((json) => GiftModel.fromJson(json))
-              .toList();
-        }
-        
-        return [];
-      } catch (e) {
-        rethrow;
+      // Gestisci il parametro age che può essere String o int
+      String? apiAge;
+      if (age != null) {
+        apiAge = age is int ? age.toString() : age as String;
       }
-    }
 
-  // Genera idee regalo per un destinatario specifico
-  Future<List<GiftModel>> generateGiftIdeasForRecipient({
+      // Prepara i dati della richiesta esattamente come nella collezione Postman
+      final Map<String, dynamic> data = {
+        'name': name ?? '',
+        'age': apiAge,
+        'relation': apiRelation,  // Questo sarà ad esempio 'friend' invece di 'Amico'
+        'interests': interests,
+        'category': apiCategory,  // Questo sarà ad esempio 'tech' invece di 'Tech'
+        'budget': apiBudget,      // Questo sarà ad esempio '50-100' invece di '50-100€'
+      };
+
+      // Aggiungi il genere solo se fornito
+      if (apiGender != null) {
+        data['gender'] = apiGender;
+      }
+
+      // Rimuovi i valori null
+      data.removeWhere((key, value) => value == null);
+
+      // Log dei dati della richiesta per debug
+      print('Generate gift ideas request data: $data');
+
+      // Effettua la richiesta API
+      final response = await _dio.post('/api/generate-gift-ideas/', data: data);
+
+      if (response.statusCode == 200) {
+        final results = response.data['results'] as List;
+        return results.map((giftJson) => Gift.fromJson(giftJson)).toList();
+      } else {
+        throw Exception('Failed to generate gift ideas: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      if (e.response != null) {
+        print('Response data: ${e.response!.data}');
+        print('Response headers: ${e.response!.headers}');
+        print('Response status code: ${e.response!.statusCode}');
+      }
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      print('Unexpected error: $e');
+      throw Exception('Failed to generate gift ideas: $e');
+    }
+  }
+
+  /// Generates gift ideas for a saved recipient
+  /// 
+  /// Takes [recipientId], [category], and [budget]
+  /// Returns a list of [Gift] objects
+  Future<List<Gift>> generateGiftIdeasForRecipient({
     required int recipientId,
     required String category,
     required String budget,
   }) async {
     try {
-      final response = await _apiClient.post(
-        '${AppConfig.generateGiftIdeasEndpoint}recipient/$recipientId/',
-        data: {
-          'category': category,
-          'budget': budget,
-        },
-      );
-      
-      if (response.statusCode == 200 && response.data['results'] != null) {
-        return (response.data['results'] as List)
-            .map((json) => GiftModel.fromJson(json))
-            .toList();
-      }
-      
-      return [];
-    } catch (e) {
-      rethrow;
-    }
-  }
+      // Convert UI values to API values
+      final String apiCategory = CategoryTranslations.toApiValue(category);
+      final String apiBudget = BudgetTranslations.toApiValue(budget);
 
-  // Ottieni lista regali salvati
-  Future<List<GiftModel>> getSavedGifts() async {
-    try {
-      final response = await _apiClient.get(AppConfig.savedGiftsEndpoint);
-      
+      // Prepare request data
+      final Map<String, dynamic> data = {
+        'category': apiCategory,
+        'budget': apiBudget,
+      };
+
+      // Make API request
+      final response = await _dio.post(
+        '/api/generate-gift-ideas/recipient/$recipientId/',
+        data: data,
+      );
+
       if (response.statusCode == 200) {
-        return (response.data as List)
-            .map((json) => GiftModel.fromJson(json))
-            .toList();
+        final results = response.data['results'] as List;
+        return results.map((giftJson) => Gift.fromJson(giftJson)).toList();
+      } else {
+        throw Exception('Failed to generate gift ideas: ${response.statusCode}');
       }
-      
-      return [];
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      if (e.response != null) {
+        print('Response data: ${e.response!.data}');
+        print('Response headers: ${e.response!.headers}');
+        print('Response status code: ${e.response!.statusCode}');
+      }
+      throw Exception('Network error: ${e.message}');
     } catch (e) {
-      return [];
+      print('Unexpected error: $e');
+      throw Exception('Failed to generate gift ideas: $e');
     }
   }
 
-  // Salva un regalo
-  Future<GiftModel?> saveGift(GiftModel gift) async {
+  /// Saves a gift idea to the user's saved gifts list
+  /// 
+  /// Takes a [Gift] object and an optional [recipientId]
+  /// Returns the updated [Gift] with server-assigned ID
+  Future<Gift> saveGift(Gift gift, {int? recipientId}) async {
     try {
-      final response = await _apiClient.post(
-        AppConfig.savedGiftsEndpoint,
-        data: gift.toJson(),
-      );
+      final Map<String, dynamic> data = gift.toJson();
       
+      // Add recipient ID if provided
+      if (recipientId != null) {
+        data['recipient'] = recipientId;
+      }
+
+      final response = await _dio.post('/api/saved-gifts/', data: data);
+
       if (response.statusCode == 201) {
-        return GiftModel.fromJson(response.data);
+        return Gift.fromJson(response.data);
+      } else {
+        throw Exception('Failed to save gift: ${response.statusCode}');
       }
-      
-      return null;
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      if (e.response != null) {
+        print('Response data: ${e.response!.data}');
+      }
+      throw Exception('Network error: ${e.message}');
     } catch (e) {
-      rethrow;
+      print('Unexpected error: $e');
+      throw Exception('Failed to save gift: $e');
     }
   }
 
-  // Ottieni dettaglio regalo salvato
-  Future<GiftModel?> getSavedGift(int id) async {
+  /// Gets a list of saved gifts for the current user
+  /// 
+  /// Returns a list of [Gift] objects
+  Future<List<Gift>> getSavedGifts() async {
     try {
-      final response = await _apiClient.get('${AppConfig.savedGiftsEndpoint}$id/');
-      
+      final response = await _dio.get('/api/saved-gifts/');
+
       if (response.statusCode == 200) {
-        return GiftModel.fromJson(response.data);
+        final results = response.data as List;
+        return results.map((giftJson) => Gift.fromJson(giftJson)).toList();
+      } else {
+        throw Exception('Failed to fetch saved gifts: ${response.statusCode}');
       }
-      
-      return null;
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      throw Exception('Network error: ${e.message}');
     } catch (e) {
-      return null;
+      print('Unexpected error: $e');
+      throw Exception('Failed to fetch saved gifts: $e');
     }
   }
 
-  // Aggiorna regalo salvato
-  Future<GiftModel?> updateSavedGift(GiftModel gift) async {
+  /// Gets details for a specific saved gift
+  /// 
+  /// Takes a [giftId]
+  /// Returns the detailed [Gift] object
+  Future<Gift> getSavedGiftById(int giftId) async {
     try {
-      if (gift.id == null) {
-        throw Exception('Cannot update gift without ID');
-      }
-      
-      final response = await _apiClient.patch(
-        '${AppConfig.savedGiftsEndpoint}${gift.id}/',
-        data: gift.toJson(),
-      );
-      
+      final response = await _dio.get('/api/saved-gifts/$giftId/');
+
       if (response.statusCode == 200) {
-        return GiftModel.fromJson(response.data);
+        return Gift.fromJson(response.data);
+      } else {
+        throw Exception('Failed to fetch gift details: ${response.statusCode}');
       }
-      
-      return null;
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      throw Exception('Network error: ${e.message}');
     } catch (e) {
-      rethrow;
+      print('Unexpected error: $e');
+      throw Exception('Failed to fetch gift details: $e');
     }
   }
 
-  // Elimina regalo salvato
-  Future<bool> deleteSavedGift(int id) async {
+  /// Deletes a saved gift
+  /// 
+  /// Takes a [giftId]
+  /// Returns true if deletion was successful
+  Future<bool> deleteSavedGift(int giftId) async {
     try {
-      final response = await _apiClient.delete('${AppConfig.savedGiftsEndpoint}$id/');
+      final response = await _dio.delete('/api/saved-gifts/$giftId/');
+
       return response.statusCode == 204;
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      throw Exception('Network error: ${e.message}');
     } catch (e) {
-      return false;
+      print('Unexpected error: $e');
+      throw Exception('Failed to delete gift: $e');
+    }
+  }
+
+  /// Updates a saved gift
+  /// 
+  /// Takes a [giftId] and a map of [updates]
+  /// Returns the updated [Gift]
+  Future<Gift> updateSavedGift(int giftId, Map<String, dynamic> updates) async {
+    try {
+      final response = await _dio.patch('/api/saved-gifts/$giftId/', data: updates);
+
+      if (response.statusCode == 200) {
+        return Gift.fromJson(response.data);
+      } else {
+        throw Exception('Failed to update gift: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      print('Unexpected error: $e');
+      throw Exception('Failed to update gift: $e');
     }
   }
 }

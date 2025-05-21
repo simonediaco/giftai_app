@@ -96,7 +96,7 @@ class _WizardScreenState extends State<WizardScreen> {
     context.read<GiftBloc>().add(
       GiftGenerateRequested(
         name: name,
-        age: age,
+        age: age?.toString(),
         gender: gender,
         relation: relation,
         interests: interests,

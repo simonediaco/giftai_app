@@ -29,7 +29,7 @@ class _GiftDetailScreenState extends State<GiftDetailScreen> {
     
     // Carica il dettaglio del regalo
     context.read<GiftBloc>().add(
-      GiftSavedDetailRequested(id: widget.giftId),
+      GiftSavedDetailRequested(giftId: widget.giftId, id: widget.giftId),
     );
   }
   
@@ -59,7 +59,7 @@ class _GiftDetailScreenState extends State<GiftDetailScreen> {
       ),
       body: BlocBuilder<GiftBloc, GiftState>(
         builder: (context, state) {
-          if (state is GiftLoading) {
+          if (state is GiftState) {
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -84,7 +84,7 @@ class _GiftDetailScreenState extends State<GiftDetailScreen> {
                   ElevatedButton(
                     onPressed: () {
                       context.read<GiftBloc>().add(
-                        GiftSavedDetailRequested(id: widget.giftId),
+                        GiftSavedDetailRequested(giftId: widget.giftId, id: widget.giftId),
                       );
                     },
                     child: const Text('Riprova'),
@@ -107,13 +107,13 @@ class _GiftDetailScreenState extends State<GiftDetailScreen> {
                     child: SizedBox(
                       width: double.infinity,
                       height: 300,
-                      child: gift.image.startsWith('assets/')
+                      child: gift.image!.startsWith('assets/')
                           ? Image.asset(
-                              gift.image,
+                              gift.image!,
                               fit: BoxFit.cover,
                             )
                           : CachedNetworkImage(
-                              imageUrl: ImageUtils.getFullImageUrl(gift.image),
+                              imageUrl: ImageUtils.getFullImageUrl(gift.image!),
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
                                 color: Colors.grey[200],

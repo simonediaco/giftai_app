@@ -1,91 +1,175 @@
-import 'package:giftai/config/app_config.dart';
-import 'package:giftai/models/recipient_model.dart';
-import 'package:giftai/services/api_client.dart';
+import 'package:dio/dio.dart';
 
+import '../models/recipient_model.dart';
+import '../utils/translations.dart';
+
+/// Repository for managing recipient data and API calls
 class RecipientRepository {
-  final ApiClient _apiClient;
+  final Dio _dio;
 
-  RecipientRepository(this._apiClient);
+  RecipientRepository(this._dio);
 
-  // Ottieni lista destinatari
-  Future<List<RecipientModel>> getRecipients() async {
+  /// Gets all recipients for the current user
+  Future<List<Recipient>> getRecipients() async {
     try {
-      final response = await _apiClient.get(AppConfig.recipientsEndpoint);
-      
+      final response = await _dio.get('/api/recipients/');
+
       if (response.statusCode == 200) {
-        return (response.data as List)
-            .map((json) => RecipientModel.fromJson(json))
-            .toList();
+        final List<dynamic> data = response.data;
+        return data.map((json) {
+          // Convert API values to UI values for display
+          final rawJson = Map<String, dynamic>.from(json);
+          
+          // Convert relation from API to UI value
+          if (rawJson.containsKey('relation')) {
+            rawJson['relation'] = RelationshipTranslations.toUiValue(rawJson['relation']);
+          }
+          
+          return Recipient.fromJson(rawJson);
+        }).toList();
+      } else {
+        throw Exception('Failed to fetch recipients: ${response.statusCode}');
       }
-      
-      return [];
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      throw Exception('Network error: ${e.message}');
     } catch (e) {
-      return [];
+      print('Unexpected error: $e');
+      throw Exception('Failed to fetch recipients: $e');
     }
   }
 
-  // Ottieni dettagli destinatario
-  Future<RecipientModel?> getRecipient(int id) async {
+  /// Gets a specific recipient by ID
+  Future<Recipient> getRecipientById(int id) async {
     try {
-      final response = await _apiClient.get('${AppConfig.recipientsEndpoint}$id/');
-      
+      final response = await _dio.get('/api/recipients/$id/');
+
       if (response.statusCode == 200) {
-        return RecipientModel.fromJson(response.data);
+        // Convert API values to UI values for display
+        final rawJson = Map<String, dynamic>.from(response.data);
+        
+        // Convert relation from API to UI value
+        if (rawJson.containsKey('relation')) {
+          rawJson['relation'] = RelationshipTranslations.toUiValue(rawJson['relation']);
+        }
+        
+        return Recipient.fromJson(rawJson);
+      } else {
+        throw Exception('Failed to fetch recipient: ${response.statusCode}');
       }
-      
-      return null;
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      throw Exception('Network error: ${e.message}');
     } catch (e) {
-      return null;
+      print('Unexpected error: $e');
+      throw Exception('Failed to fetch recipient: $e');
     }
   }
+  
+  /// Gets a specific recipient by ID (alias for getRecipientById)
+  Future<Recipient> getRecipient(int id) async {
+    return getRecipientById(id);
+  }
 
-  // Crea nuovo destinatario
-  Future<RecipientModel?> createRecipient(RecipientModel recipient) async {
+  /// Creates a new recipient
+  Future<Recipient> createRecipient(Recipient recipient) async {
     try {
-      final response = await _apiClient.post(
-        AppConfig.recipientsEndpoint,
-        data: recipient.toJson(),
-      );
+      // Convert UI values to API values for sending
+      final Map<String, dynamic> data = recipient.toJson();
       
+      // Convert relation from UI to API value
+      if (data.containsKey('relation')) {
+        data['relation'] = RelationshipTranslations.toApiValue(data['relation']);
+      }
+      
+      // Convert gender if present
+      if (data.containsKey('gender') && data['gender'] != null) {
+        data['gender'] = GenderTranslations.toApiValue(data['gender']);
+      }
+
+      final response = await _dio.post('/api/recipients/', data: data);
+
       if (response.statusCode == 201) {
-        return RecipientModel.fromJson(response.data);
+        // Convert API values back to UI values for returning
+        final rawJson = Map<String, dynamic>.from(response.data);
+        
+        // Convert relation from API to UI value
+        if (rawJson.containsKey('relation')) {
+          rawJson['relation'] = RelationshipTranslations.toUiValue(rawJson['relation']);
+        }
+        
+        return Recipient.fromJson(rawJson);
+      } else {
+        throw Exception('Failed to create recipient: ${response.statusCode}');
       }
-      
-      return null;
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      if (e.response != null) {
+        print('Response data: ${e.response!.data}');
+      }
+      throw Exception('Network error: ${e.message}');
     } catch (e) {
-      rethrow;
+      print('Unexpected error: $e');
+      throw Exception('Failed to create recipient: $e');
     }
   }
 
-  // Aggiorna destinatario
-  Future<RecipientModel?> updateRecipient(RecipientModel recipient) async {
+  /// Updates an existing recipient
+  Future<Recipient> updateRecipient(Recipient recipient) async {
     try {
       if (recipient.id == null) {
         throw Exception('Cannot update recipient without ID');
       }
+
+      // Convert UI values to API values for sending
+      final Map<String, dynamic> data = recipient.toJson();
       
-      final response = await _apiClient.patch(
-        '${AppConfig.recipientsEndpoint}${recipient.id}/',
-        data: recipient.toJson(),
-      );
-      
-      if (response.statusCode == 200) {
-        return RecipientModel.fromJson(response.data);
+      // Convert relation from UI to API value
+      if (data.containsKey('relation')) {
+        data['relation'] = RelationshipTranslations.toApiValue(data['relation']);
       }
       
-      return null;
+      // Convert gender if present
+      if (data.containsKey('gender') && data['gender'] != null) {
+        data['gender'] = GenderTranslations.toApiValue(data['gender']);
+      }
+
+      final response =
+          await _dio.put('/api/recipients/${recipient.id}/', data: data);
+
+      if (response.statusCode == 200) {
+        // Convert API values back to UI values for returning
+        final rawJson = Map<String, dynamic>.from(response.data);
+        
+        // Convert relation from API to UI value
+        if (rawJson.containsKey('relation')) {
+          rawJson['relation'] = RelationshipTranslations.toUiValue(rawJson['relation']);
+        }
+        
+        return Recipient.fromJson(rawJson);
+      } else {
+        throw Exception('Failed to update recipient: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      throw Exception('Network error: ${e.message}');
     } catch (e) {
-      rethrow;
+      print('Unexpected error: $e');
+      throw Exception('Failed to update recipient: $e');
     }
   }
 
-  // Elimina destinatario
+  /// Deletes a recipient
   Future<bool> deleteRecipient(int id) async {
     try {
-      final response = await _apiClient.delete('${AppConfig.recipientsEndpoint}$id/');
+      final response = await _dio.delete('/api/recipients/$id/');
       return response.statusCode == 204;
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      throw Exception('Network error: ${e.message}');
     } catch (e) {
-      return false;
+      print('Unexpected error: $e');
+      throw Exception('Failed to delete recipient: $e');
     }
   }
 }

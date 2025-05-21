@@ -5,7 +5,7 @@ import 'package:giftai/utils/image_utils.dart';
 import 'package:giftai/utils/price_utils.dart';
 
 class GiftGridItem extends StatelessWidget {
-  final GiftModel gift;
+  final Gift gift;
   final VoidCallback onTap;
 
   const GiftGridItem({
@@ -32,13 +32,13 @@ class GiftGridItem extends StatelessWidget {
               children: [
                 AspectRatio(
                   aspectRatio: 1,
-                  child: gift.image.startsWith('assets/')
+                  child: gift.image!.startsWith('assets/')
                       ? Image.asset(
-                          gift.image,
+                          gift.image!,
                           fit: BoxFit.cover,
                         )
                       : CachedNetworkImage(
-                          imageUrl: ImageUtils.getFullImageUrl(gift.image),
+                          imageUrl: ImageUtils.getFullImageUrl(gift.image!),
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
                             color: Colors.grey[200],

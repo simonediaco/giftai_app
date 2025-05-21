@@ -33,7 +33,7 @@ class _RecipientDetailScreenState extends State<RecipientDetailScreen> {
     );
   }
   
-  void _deleteRecipient(RecipientModel recipient) {
+  void _deleteRecipient(Recipient recipient) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -266,7 +266,7 @@ class _RecipientDetailScreenState extends State<RecipientDetailScreen> {
                     context,
                     icon: Icons.person,
                     title: 'Genere',
-                    value: recipient.gender,
+                    value: recipient.gender ?? 'Non specificato',
                   ),
                   
                   // Data di nascita
@@ -315,7 +315,7 @@ class _RecipientDetailScreenState extends State<RecipientDetailScreen> {
                   ],
                   
                   // Colori preferiti
-                  if (recipient.favoriteColors.isNotEmpty) ...[
+                  if (recipient.favoriteColors!.isNotEmpty) ...[
                     const Text(
                       'Colori preferiti',
                       style: TextStyle(
@@ -328,7 +328,7 @@ class _RecipientDetailScreenState extends State<RecipientDetailScreen> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: recipient.favoriteColors.map((color) {
+                      children: recipient.favoriteColors!.map((color) {
                         return Chip(
                           label: Text(color),
                           backgroundColor: Colors.grey[200],
@@ -340,7 +340,7 @@ class _RecipientDetailScreenState extends State<RecipientDetailScreen> {
                   ],
                   
                   // Non graditi
-                  if (recipient.dislikes.isNotEmpty) ...[
+                  if (recipient.dislikes!.isNotEmpty) ...[
                     const Text(
                       'Non graditi',
                       style: TextStyle(
@@ -353,7 +353,7 @@ class _RecipientDetailScreenState extends State<RecipientDetailScreen> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: recipient.dislikes.map((dislike) {
+                      children: recipient.dislikes!.map((dislike) {
                         return Chip(
                           label: Text(dislike),
                           backgroundColor: Colors.red[100],

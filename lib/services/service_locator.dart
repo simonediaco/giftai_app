@@ -1,3 +1,4 @@
+import 'package:dio/src/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:giftai/repositories/auth_repository.dart';
 import 'package:giftai/repositories/gift_repository.dart';
@@ -17,7 +18,7 @@ Future<void> setupServiceLocator() async {
   
   // Repository
   getIt.registerLazySingleton<AuthRepository>(() => AuthRepository(getIt<ApiClient>()));
-  getIt.registerLazySingleton<GiftRepository>(() => GiftRepository(getIt<ApiClient>()));
-  getIt.registerLazySingleton<RecipientRepository>(() => RecipientRepository(getIt<ApiClient>()));
+  getIt.registerLazySingleton<GiftRepository>(() => GiftRepository(getIt<ApiClient>() as Dio));
+  getIt.registerLazySingleton<RecipientRepository>(() => RecipientRepository(getIt<ApiClient>() as Dio));
   getIt.registerLazySingleton<HistoryRepository>(() => HistoryRepository(getIt<ApiClient>()));
 }

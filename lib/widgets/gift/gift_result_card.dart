@@ -5,7 +5,7 @@ import 'package:giftai/utils/image_utils.dart';
 import 'package:giftai/utils/price_utils.dart';
 
 class GiftResultCard extends StatelessWidget {
-  final GiftModel gift;
+  final Gift gift;
   final VoidCallback onSave;
   final VoidCallback onShare;
   final VoidCallback onViewOnAmazon;
@@ -37,13 +37,13 @@ class GiftResultCard extends StatelessWidget {
                 SizedBox(
                   height: 220,
                   width: double.infinity,
-                  child: gift.image.startsWith('assets/')
+                  child: gift.image!.startsWith('assets/')
                       ? Image.asset(
-                          gift.image,
+                          gift.image ?? '',
                           fit: BoxFit.cover,
                         )
                       : CachedNetworkImage(
-                          imageUrl: ImageUtils.getFullImageUrl(gift.image),
+                          imageUrl: ImageUtils.getFullImageUrl(gift.image!),
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
                             color: Colors.grey[200],
