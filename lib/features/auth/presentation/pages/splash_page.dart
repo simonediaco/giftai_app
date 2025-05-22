@@ -95,7 +95,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                   const SizedBox(height: AppTheme.spaceL),
                   // Nome app con stile moderno
                   Text(
-                    'GiftAI',
+                    'Donatello',
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.primary,

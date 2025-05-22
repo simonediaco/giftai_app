@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/date_utils.dart' as utils; // ✅ Import utility
 import '../../domain/entities/recipient.dart';
 
 class RecipientCard extends StatelessWidget {
@@ -18,15 +19,9 @@ class RecipientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Calcola l'età dalla data di nascita
-    final age = DateTime.now().year - recipient.birthDate.year;
-    final birthdayThisYear = DateTime(
-      DateTime.now().year,
-      recipient.birthDate.month,
-      recipient.birthDate.day,
-    );
-    final isBirthdayPassed = DateTime.now().isAfter(birthdayThisYear);
-    final adjustedAge = isBirthdayPassed ? age : age - 1;
+    // ✅ USA utility comune invece di logica duplicata
+    final age = utils.DateUtils.calculateAge(recipient.birthDate);
+    final isBirthday = utils.DateUtils.isBirthdayToday(recipient.birthDate);
     
     // Mappa dei generi per visualizzazione
     final genderMap = {
@@ -37,7 +32,6 @@ class RecipientCard extends StatelessWidget {
       'O': 'Altro'
     };
     
-    // Mappa delle relazioni per visualizzazione in italiano
     // Mappa delle relazioni per visualizzazione in italiano
     final relationMap = {
       'amico': 'Amico',
@@ -52,101 +46,149 @@ class RecipientCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
       ),
+      // ✅ Evidenzia se è il compleanno
+      elevation: isBirthday ? AppTheme.elevationL : AppTheme.elevationS,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spaceM),
-          child: Row(
-            children: [
-              // Avatar basato sul genere
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: _getAvatarColor(recipient.gender),
-                child: Text(
-                  recipient.name.substring(0, 1).toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppTheme.spaceM),
-              
-              // Informazioni
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: Container(
+          // ✅ Bordo speciale per compleanni
+          decoration: isBirthday ? BoxDecoration(
+            borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary,
+              width: 2,
+            ),
+          ) : null,
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.spaceM),
+            child: Row(
+              children: [
+                // Avatar con indicatore compleanno
+                Stack(
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          recipient.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundColor: _getAvatarColor(recipient.gender, context),
+                      child: Text(
+                        recipient.name.substring(0, 1).toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    // ✅ Badge compleanno
+                    if (isBirthday)
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.cake,
+                            color: Colors.white,
+                            size: 16,
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '($adjustedAge)',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '${genderMap[recipient.gender] ?? recipient.gender} · ${DateFormat('dd/MM/yyyy').format(recipient.birthDate)}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    if (recipient.relation != null)
-                      Text(
-                        relationMap[recipient.relation!] ?? recipient.relation!,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    if (recipient.interests.isNotEmpty)
-                      Wrap(
-                        spacing: 4,
-                        children: recipient.interests.take(3).map((interest) => 
-                          Chip(
-                            label: Text(
-                              interest,
-                              style: const TextStyle(fontSize: 10),
-                            ),
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          )
-                        ).toList(),
                       ),
                   ],
                 ),
-              ),
-              
-              // Pulsanti azioni
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                color: Colors.red,
-                onPressed: onDelete,
-              ),
-            ],
+                const SizedBox(width: AppTheme.spaceM),
+                
+                // Informazioni
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            recipient.name,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              // ✅ Evidenzia nome se compleanno
+                              color: isBirthday ? Theme.of(context).colorScheme.primary : null,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '($age)',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          // ✅ Icona compleanno
+                          if (isBirthday) ...[
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.celebration,
+                              size: 16,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ],
+                        ],
+                      ),
+                      Text(
+                        '${genderMap[recipient.gender] ?? recipient.gender} · ${utils.DateUtils.formatDateIT(recipient.birthDate)}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      if (recipient.relation != null)
+                        Text(
+                          relationMap[recipient.relation!] ?? recipient.relation!,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      if (recipient.interests.isNotEmpty)
+                        Wrap(
+                          spacing: 4,
+                          children: recipient.interests.take(3).map((interest) => 
+                            Chip(
+                              label: Text(
+                                interest,
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                              padding: EdgeInsets.zero,
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            )
+                          ).toList(),
+                        ),
+                    ],
+                  ),
+                ),
+                
+                // Pulsanti azioni
+                IconButton(
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: Theme.of(context).colorScheme.error, // ✅ Uso del tema
+                  ),
+                  onPressed: onDelete,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
   
-  Color _getAvatarColor(String gender) {
+  Color _getAvatarColor(String gender, BuildContext context) {
+    final theme = Theme.of(context);
     switch (gender) {
       case 'M':
-        return Colors.blue;
+        return theme.colorScheme.primary;
       case 'F':
-        return Colors.pink;
+        return theme.colorScheme.secondary;
       case 'NB':
-        return Colors.green;
+        return theme.colorScheme.tertiary;
       case 'X':
-        return Colors.yellow;
+        return theme.colorScheme.outline;
       case 'O':
       default:
-        return Colors.purple;
+        return theme.colorScheme.primaryContainer;
     }
   }
 }

@@ -1,64 +1,89 @@
 import 'package:dio/dio.dart';
+import 'error_messages.dart';
 
 class ApiError implements Exception {
   final String message;
+  final String? technicalMessage; // ✅ Messaggio tecnico per debug
   final int? statusCode;
   final Map<String, dynamic>? data;
 
   ApiError({
     required this.message,
+    this.technicalMessage,
     this.statusCode,
     this.data,
   });
 
   factory ApiError.fromDioError(DioException error) {
     int? statusCode = error.response?.statusCode;
-    String message = 'Si è verificato un errore';
+    String technicalMessage = error.message ?? 'Unknown error';
+    String userMessage = ErrorMessages.genericError;
     Map<String, dynamic>? data = error.response?.data is Map ? error.response?.data : null;
 
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        message = 'La connessione al server è scaduta';
+        userMessage = ErrorMessages.timeoutError;
         break;
+        
       case DioExceptionType.badResponse:
-        switch (statusCode) {
-          case 400:
-            message = 'Richiesta non valida';
-            break;
-          case 401:
-            message = 'Non autorizzato';
-            break;
-          case 403:
-            message = 'Accesso negato';
-            break;
-          case 404:
-            message = 'La risorsa richiesta non è disponibile';
-            break;
-          case 500:
-            message = 'Errore interno del server';
-            break;
-          default:
-            message = 'Si è verificato un errore (${statusCode})';
-            break;
+        userMessage = ErrorMessages.getMessageByStatusCode(statusCode ?? 500);
+        
+        // ✅ Gestisci messaggi specifici dal backend se disponibili
+        if (data != null && data['message'] != null) {
+          final backendMessage = data['message'].toString();
+          if (backendMessage.isNotEmpty && backendMessage.length < 100) {
+            userMessage = backendMessage;
+          }
         }
         break;
+        
       case DioExceptionType.cancel:
-        message = 'La richiesta è stata annullata';
+        userMessage = 'La richiesta è stata annullata';
         break;
+        
       case DioExceptionType.connectionError:
-        message = 'Nessuna connessione internet';
+        userMessage = ErrorMessages.networkError;
         break;
+        
       default:
-        message = 'Si è verificato un errore imprevisto';
+        userMessage = ErrorMessages.getDisplayMessage(error.message ?? '');
         break;
     }
 
     return ApiError(
-      message: message,
+      message: userMessage,
+      technicalMessage: technicalMessage,
       statusCode: statusCode,
       data: data,
     );
+  }
+  
+  /// Factory per errori custom dell'app
+  factory ApiError.custom(String message, {int? statusCode}) {
+    return ApiError(
+      message: message,
+      statusCode: statusCode,
+    );
+  }
+  
+  /// Factory per errori di validazione
+  factory ApiError.validation(String field, String message) {
+    return ApiError(
+      message: message,
+      statusCode: 400,
+      data: {'field': field, 'error': message},
+    );
+  }
+  
+  @override
+  String toString() => message;
+  
+  /// Per il debugging - include dettagli tecnici
+  String toDebugString() {
+    return 'ApiError: $message'
+           '${statusCode != null ? ' (Status: $statusCode)' : ''}'
+           '${technicalMessage != null ? ' - Technical: $technicalMessage' : ''}';
   }
 }

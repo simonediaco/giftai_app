@@ -51,15 +51,15 @@ class MyApp extends StatelessWidget {
         BlocProvider<SavedGiftsBloc>(
           create: (context) => getIt<SavedGiftsBloc>(),
         ),
-        BlocProvider<RecipientsBloc>( // Aggiungi questo
+        BlocProvider<RecipientsBloc>(
           create: (context) => getIt<RecipientsBloc>(),
         ),
       ],
       child: MaterialApp(
-        title: 'GiftAI',
+        title: 'Donatello', // ✅ CHANGED: era 'GiftAI'
         theme: AppTheme.lightTheme(),
         darkTheme: AppTheme.darkTheme(),
-        themeMode: ThemeMode.system,
+        themeMode: ThemeMode.dark, // ✅ FORCED DARK MODE - sempre dark mode
         debugShowCheckedModeBanner: false,
         initialRoute: SplashPage.routeName,
         routes: {
@@ -67,7 +67,6 @@ class MyApp extends StatelessWidget {
           LoginPage.routeName: (context) => const LoginPage(),
           RegisterPage.routeName: (context) => const RegisterPage(),
           MainLayout.routeName: (context) => const MainLayout(),
-          // GiftWizardPage.routeName: (context) => const GiftWizardPage(),
         },
       ),
     );

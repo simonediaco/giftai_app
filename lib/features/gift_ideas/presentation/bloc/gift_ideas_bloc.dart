@@ -1,14 +1,17 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/usecases/generate_gift_ideas.dart';
+import '../../domain/repositories/gift_ideas_repository.dart'; // ✅ Aggiunto per accesso diretto
 import 'gift_ideas_event.dart';
 import 'gift_ideas_state.dart';
 
 class GiftIdeasBloc extends Bloc<GiftIdeasEvent, GiftIdeasState> {
   final GenerateGiftIdeas generateGiftIdeas;
+  final GiftIdeasRepository giftIdeasRepository; // ✅ Aggiunto repository diretto
   
   GiftIdeasBloc({
     required this.generateGiftIdeas,
+    required this.giftIdeasRepository, // ✅ Dependency injection
   }) : super(GiftIdeasInitial()) {
     on<GenerateGiftIdeasRequested>(_onGenerateGiftIdeasRequested);
     on<GenerateGiftIdeasForRecipientRequested>(_onGenerateGiftIdeasForRecipientRequested);
@@ -43,10 +46,16 @@ class GiftIdeasBloc extends Bloc<GiftIdeasEvent, GiftIdeasState> {
   ) async {
     emit(GiftIdeasLoading());
     try {
-      // Per ora, gestiremo questa funzionalità più avanti quando implementeremo i destinatari
-      emit(GiftIdeasError("Funzionalità non ancora implementata"));
+      // ✅ FIXED: Ora implementa correttamente la chiamata al repository
+      final gifts = await giftIdeasRepository.generateGiftIdeasForRecipient(
+        event.recipientId,
+        category: event.category,
+        minPrice: event.minPrice,
+        maxPrice: event.maxPrice,
+      );
+      emit(GiftIdeasGenerated(gifts));
     } catch (e) {
-      emit(GiftIdeasError(e.toString()));
+      emit(GiftIdeasError('Errore nella generazione regali per destinatario: ${e.toString()}'));
     }
   }
   

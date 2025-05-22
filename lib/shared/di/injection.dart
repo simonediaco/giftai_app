@@ -111,6 +111,7 @@ Future<void> initializeDependencies() async {
   getIt.registerFactory<GiftIdeasBloc>(
     () => GiftIdeasBloc(
       generateGiftIdeas: getIt<GenerateGiftIdeas>(),
+      giftIdeasRepository: getIt<GiftIdeasRepository>(),
     ),
   );
   
@@ -181,5 +182,4 @@ Future<void> initializeDependencies() async {
       deleteRecipient: getIt<DeleteRecipient>(),
     ),
   );
-  // Altri registri verranno aggiunti man mano che implementiamo le features
 }

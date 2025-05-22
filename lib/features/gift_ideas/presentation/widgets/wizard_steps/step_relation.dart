@@ -22,7 +22,7 @@ class StepRelation extends StatefulWidget {
 class _StepRelationState extends State<StepRelation> {
   final List<RelationOption> _relationOptions = [
     RelationOption(
-      title: 'amico', //TODO: translate 
+      title: 'Amico', //TODO: translate 
       icon: Icons.people_outline,
       description: 'Un amico o conoscente',
     ),

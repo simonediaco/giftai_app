@@ -37,7 +37,7 @@ class _AddRecipientPageState extends State<AddRecipientPage> {
   
   // Opzioni disponibili - aggiornate con valori accettati dall'API
   final List<Map<String, String>> _genderOptions = [
-    {'value': 'X', 'label': 'Non specificato'},
+    // {'value': 'X', 'label': 'Non specificato'},
     {'value': 'M', 'label': 'Uomo'},
     {'value': 'F', 'label': 'Donna'},
     {'value': 'N', 'label': 'Non binario'},
@@ -45,7 +45,7 @@ class _AddRecipientPageState extends State<AddRecipientPage> {
   ];
   
   // Valori accettati dall'API per la relazione - in minuscolo
-  final List<String> _relationOptions = ['amico', 'familaire', 'partner', 'collega', 'altro'];
+  final List<String> _relationOptions = ['amico', 'familiare', 'partner', 'collega', 'altro'];
     
   // Mapping per la visualizzazione in italiano
   final Map<String, String> _relationLabels = {

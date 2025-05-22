@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../core/config/app_config.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/golden_accents.dart';
 import '../../domain/entities/gift.dart';
 
 class GiftCard extends StatefulWidget {
@@ -52,12 +53,16 @@ class _GiftCardState extends State<GiftCard> with SingleTickerProviderStateMixin
             ? '${widget.gift.name} aggiunto ai preferiti' 
             : '${widget.gift.name} rimosso dai preferiti'),
         duration: const Duration(seconds: 2),
+        backgroundColor: _isFavorite 
+            ? AppTheme.successColor 
+            : Theme.of(context).colorScheme.surface,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final imageUrl = widget.gift.image != null 
         ? '${AppConfig.instance.apiBaseUrl}${widget.gift.image}'
         : null;
@@ -103,70 +108,82 @@ class _GiftCardState extends State<GiftCard> with SingleTickerProviderStateMixin
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
                                 height: 200,
-                                color: Colors.grey.shade300,
-                                child: const Center(
-                                  child: CircularProgressIndicator(),
+                                color: theme.colorScheme.surfaceVariant,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: theme.colorScheme.primary,
+                                  ),
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
                                 height: 200,
-                                color: Colors.grey.shade300,
-                                child: const Icon(
+                                color: theme.colorScheme.surfaceVariant,
+                                child: Icon(
                                   Icons.card_giftcard,
                                   size: 60,
-                                  color: Colors.grey,
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             )
                           : Container(
                               height: 200,
-                              color: Colors.grey.shade300,
-                              child: const Icon(
+                              color: theme.colorScheme.surfaceVariant,
+                              child: Icon(
                                 Icons.card_giftcard,
                                 size: 60,
-                                color: Colors.grey,
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
                     ),
                     
-                    // Badge del match
+                    // ✅ Badge PERFECT MATCH dorato per 90%+
                     Positioned(
                       top: AppTheme.spaceM,
                       right: AppTheme.spaceM,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppTheme.spaceM,
-                          vertical: AppTheme.spaceXS,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getMatchColor(widget.gift.match),
-                          borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                            const SizedBox(width: AppTheme.spaceXS),
-                            Text(
-                              '${widget.gift.match}% Match',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          // Perfect Match Badge (oro)
+                          GoldenAccents.perfectMatchBadge(widget.gift.match),
+                          
+                          // Badge match normale
+                          if (widget.gift.match < 90)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppTheme.spaceM,
+                                vertical: AppTheme.spaceXS,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.getMatchColor(widget.gift.match),
+                                borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.colorScheme.shadow.withValues(alpha: 0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    color: theme.colorScheme.onPrimary,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: AppTheme.spaceXS),
+                                  Text(
+                                    '${widget.gift.match}% Match',
+                                    style: TextStyle(
+                                      color: theme.colorScheme.onPrimary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
+                        ],
                       ),
                     ),
                     
@@ -180,13 +197,13 @@ class _GiftCardState extends State<GiftCard> with SingleTickerProviderStateMixin
                           vertical: AppTheme.spaceXS,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
+                          color: theme.colorScheme.surface.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
                         ),
                         child: Text(
                           widget.gift.category,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -205,7 +222,7 @@ class _GiftCardState extends State<GiftCard> with SingleTickerProviderStateMixin
                       // Nome
                       Text(
                         widget.gift.name,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                         maxLines: 2,
@@ -222,13 +239,13 @@ class _GiftCardState extends State<GiftCard> with SingleTickerProviderStateMixin
                               vertical: AppTheme.spaceXS,
                             ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                              color: theme.colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
                             ),
                             child: Text(
                               '${widget.gift.price.toStringAsFixed(2)}€',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
+                                color: theme.colorScheme.onPrimaryContainer,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -245,14 +262,16 @@ class _GiftCardState extends State<GiftCard> with SingleTickerProviderStateMixin
                               onPressed: _toggleFavorite,
                               icon: Icon(
                                 _isFavorite ? Icons.favorite : Icons.favorite_border,
-                                color: _isFavorite ? Colors.red : null,
+                                color: _isFavorite 
+                                    ? AppTheme.errorColor 
+                                    : theme.colorScheme.primary,
                               ),
                               label: Text(_isFavorite ? 'Salvato' : 'Salva'),
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(
                                   color: _isFavorite 
-                                      ? Colors.red 
-                                      : Theme.of(context).colorScheme.primary,
+                                      ? AppTheme.errorColor 
+                                      : theme.colorScheme.primary,
                                 ),
                               ),
                             ),
@@ -278,17 +297,5 @@ class _GiftCardState extends State<GiftCard> with SingleTickerProviderStateMixin
         ),
       ),
     );
-  }
-
-  Color _getMatchColor(int match) {
-    if (match >= 90) {
-      return Colors.green.shade700;
-    } else if (match >= 70) {
-      return Colors.lightGreen.shade700;
-    } else if (match >= 50) {
-      return Colors.orange.shade700;
-    } else {
-      return Colors.red.shade700;
-    }
   }
 }
