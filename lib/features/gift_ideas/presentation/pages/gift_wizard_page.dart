@@ -70,8 +70,8 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
             relation: _wizardData.relation,
             interests: _wizardData.interests,
             category: _wizardData.category,
-            budget: _wizardData.budget,
-          ),
+            minPrice: _wizardData.minPrice,
+            maxPrice: _wizardData.maxPrice,),
         );
       }
     }

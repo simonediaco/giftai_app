@@ -1,5 +1,5 @@
+
 import '../entities/gift.dart';
-import '../../data/models/gift_request.dart';
 
 abstract class GiftIdeasRepository {
   Future<List<Gift>> generateGiftIdeas({
@@ -9,12 +9,14 @@ abstract class GiftIdeasRepository {
     String? relation,
     List<String>? interests,
     String? category,
-    String? budget,
+    int? minPrice,
+    int? maxPrice,
   });
   
   Future<List<Gift>> generateGiftIdeasForRecipient(
     int recipientId, {
     String? category,
-    String? budget,
+    int? minPrice,
+    int? maxPrice,
   });
 }

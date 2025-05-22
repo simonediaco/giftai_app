@@ -32,6 +32,8 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
   final List<String> _selectedInterests = [];
   String _selectedCategory = '';
   String _selectedBudget = '';
+  int _selectedMinPrice = 0;
+  int _selectedMaxPrice = 0;
 
   // Opzioni per i dropdown
   // Aggiunto: opzioni genere
@@ -108,7 +110,8 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
               relation: _selectedRelation, // Ora è nel formato corretto
               interests: _selectedInterests,
               category: _selectedCategory,
-              budget: _selectedBudget, // Senza simbolo €
+              minPrice: _selectedMinPrice, // Budget minimo
+              maxPrice: _selectedMaxPrice, // Budget massimo
             ),
           );
     }

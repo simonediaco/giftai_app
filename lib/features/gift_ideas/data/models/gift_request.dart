@@ -5,7 +5,8 @@ class GiftGenerationRequest {
   final String? relation;
   final List<String>? interests;
   final String? category;
-  final String? budget;
+  final int? min_price;
+  final int? max_price;
   
   GiftGenerationRequest({
     this.name,
@@ -14,7 +15,8 @@ class GiftGenerationRequest {
     this.relation,
     this.interests,
     this.category,
-    this.budget,
+    this.min_price,
+    this.max_price,
   });
   
   Map<String, dynamic> toJson() {
@@ -26,7 +28,8 @@ class GiftGenerationRequest {
     if (relation != null) data['relation'] = relation;
     if (interests != null) data['interests'] = interests;
     if (category != null) data['category'] = category;
-    if (budget != null) data['budget'] = budget;
+    if (min_price != null) data['min_price'] = min_price;
+    if (max_price != null) data['max_price'] = max_price;
     
     return data;
   }

@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 abstract class GiftIdeasEvent extends Equatable {
   const GiftIdeasEvent();
-  
+
   @override
   List<Object?> get props => [];
 }
@@ -14,8 +14,9 @@ class GenerateGiftIdeasRequested extends GiftIdeasEvent {
   final String? relation;
   final List<String>? interests;
   final String? category;
-  final String? budget;
-  
+  final int? minPrice;
+  final int? maxPrice;
+
   const GenerateGiftIdeasRequested({
     this.name,
     this.age,
@@ -23,26 +24,29 @@ class GenerateGiftIdeasRequested extends GiftIdeasEvent {
     this.relation,
     this.interests,
     this.category,
-    this.budget,
+    this.minPrice,
+    this.maxPrice,
   });
-  
+
   @override
-  List<Object?> get props => [name, age, gender, relation, interests, category, budget];
+  List<Object?> get props => [name, age, gender, relation, interests, category, minPrice, maxPrice];
 }
 
 class GenerateGiftIdeasForRecipientRequested extends GiftIdeasEvent {
   final int recipientId;
   final String? category;
-  final String? budget;
-  
+  final int? minPrice;
+  final int? maxPrice;
+
   const GenerateGiftIdeasForRecipientRequested({
     required this.recipientId,
     this.category,
-    this.budget,
+    this.minPrice,
+    this.maxPrice,
   });
-  
+
   @override
-  List<Object?> get props => [recipientId, category, budget];
+  List<Object?> get props => [recipientId, category, minPrice, maxPrice];
 }
 
 class ClearGiftIdeasRequested extends GiftIdeasEvent {}

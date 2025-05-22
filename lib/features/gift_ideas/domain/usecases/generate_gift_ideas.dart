@@ -13,7 +13,8 @@ class GenerateGiftIdeas {
     String? relation,
     List<String>? interests,
     String? category,
-    String? budget,
+    int? minPrice,
+    int? maxPrice,
   }) {
     return _repository.generateGiftIdeas(
       name: name,
@@ -22,7 +23,8 @@ class GenerateGiftIdeas {
       relation: relation,
       interests: interests,
       category: category,
-      budget: budget,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
     );
   }
 }

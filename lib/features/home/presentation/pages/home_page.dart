@@ -1,12 +1,14 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../../features/gift_ideas/presentation/pages/gift_wizard_page.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../gift_ideas/presentation/bloc/gift_ideas_bloc.dart';
+import '../../../gift_ideas/presentation/bloc/gift_ideas_event.dart';
 import '../../../recipients/presentation/bloc/recipients_bloc.dart';
 import '../../../recipients/presentation/bloc/recipients_event.dart';
 import '../../../recipients/presentation/bloc/recipients_state.dart';
@@ -21,15 +23,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
-  @override
   @override
   void initState() {
     super.initState();
-    // Fetch recipients when page loads
     context.read<RecipientsBloc>().add(FetchRecipients());
   }
 
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
         if (state is Authenticated) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text(''),
+              title: const Text('GiftAI'),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.notifications_outlined),
@@ -119,12 +119,30 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
 
-                  // Generate Gift Button
+                  // Bottone "Genera un Regalo" evidenziato con sfumatura
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL),
+                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceL, vertical: AppTheme.spaceL),
                     child: Container(
                       width: double.infinity,
                       height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+                        gradient: LinearGradient(
+                          colors: [
+                            theme.colorScheme.primary,
+                            theme.colorScheme.secondary,
+                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.primary.withOpacity(0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.push(
@@ -135,17 +153,36 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.primary,
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
                           ),
+                          padding: EdgeInsets.zero,
                         ),
-                        child: Text(
-                          'Genera un Regalo',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
-                            letterSpacing: 0.5,
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                theme.colorScheme.primary,
+                                theme.colorScheme.secondary,
+                              ],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+                          ),
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Genera un Regalo',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -156,8 +193,6 @@ class _HomePageState extends State<HomePage> {
                   // Recipients Quick Access
                   BlocBuilder<RecipientsBloc, RecipientsState>(
                     builder: (context, state) {
-                      print('Recipients state: $state'); // Debug log
-
                       if (state is RecipientsLoading) {
                         return const Padding(
                           padding: EdgeInsets.all(AppTheme.spaceL),
@@ -173,7 +208,6 @@ class _HomePageState extends State<HomePage> {
                       }
 
                       if (state is RecipientsLoaded) {
-                        print('Recipients loaded: ${state.recipients.length}'); // Debug log
                         if (state.recipients.isEmpty) {
                           return const Padding(
                             padding: EdgeInsets.all(AppTheme.spaceL),
@@ -205,41 +239,114 @@ class _HomePageState extends State<HomePage> {
                                       onTap: () {
                                         showDialog(
                                           context: context,
-                                          builder: (context) => AlertDialog(
-                                            title: Text('Conferma Dettagli'),
-                                            content: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text('Destinatario: ${recipient.name}'),
-                                                const SizedBox(height: AppTheme.spaceXS),
-                                                Text('Età: ${DateTime.now().year - recipient.birthDate.year}'),
-                                                const SizedBox(height: AppTheme.spaceXS),
-                                                Text('Interessi: ${recipient.interests.join(", ")}'),
-                                              ],
+                                          builder: (context) {
+                                            String selectedCategory = 'Tech';
+                                            double minPrice = 50;
+                                            double maxPrice = 200;
+                                            final categories = ['Tech', 'Moda', 'Sport', 'Casa', 'Libri'];
+                                            
+                                            return AlertDialog(
+                                              title: Text('Genera Regalo per ${recipient.name}'),
+                                              content: StatefulBuilder(
+                                                builder: (context, setState) {
+
+                                                return Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    // Recipient Info
+                                                    Text('Età: ${_calculateAge(recipient.birthDate)}'),
+                                                    const SizedBox(height: AppTheme.spaceXS),
+                                                    Text('Interessi: ${recipient.interests.join(", ")}'),
+                                                    const Divider(),
+                                                    
+                                                    // Category Selection
+                                                    Text('Categoria:', style: theme.textTheme.titleSmall),
+                                                    DropdownButton<String>(
+                                                      value: selectedCategory,
+                                                      isExpanded: true,
+                                                      items: categories.map((String category) {
+                                                        return DropdownMenuItem<String>(
+                                                          value: category,
+                                                          child: Text(category),
+                                                        );
+                                                      }).toList(),
+                                                      onChanged: (String? value) {
+                                                        if (value != null) {
+                                                          setState(() => selectedCategory = value);
+                                                        }
+                                                      },
+                                                    ),
+                                                    const SizedBox(height: AppTheme.spaceM),
+                                                    
+                                                    // Price Range
+                                                    Text('Budget:', style: theme.textTheme.titleSmall),
+                                                    Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: TextFormField(
+                                                            initialValue: minPrice.toString(),
+                                                            keyboardType: TextInputType.number,
+                                                            decoration: const InputDecoration(
+                                                              labelText: 'Min €',
+                                                            ),
+                                                            onChanged: (value) {
+                                                              setState(() {
+                                                                minPrice = double.tryParse(value) ?? minPrice;
+                                                              });
+                                                            },
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: AppTheme.spaceM),
+                                                        Expanded(
+                                                          child: TextFormField(
+                                                            initialValue: maxPrice.toString(),
+                                                            keyboardType: TextInputType.number,
+                                                            decoration: const InputDecoration(
+                                                              labelText: 'Max €',
+                                                            ),
+                                                            onChanged: (value) {
+                                                              setState(() {
+                                                                maxPrice = double.tryParse(value) ?? maxPrice;
+                                                              });
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                );
+                                              },
                                             ),
                                             actions: [
                                               TextButton(
-                                                onPressed: () => Navigator.pop(context),
-                                                child: Text('Modifica'),
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                  Navigator.pushNamed(
+                                                    context,
+                                                    '/recipients',
+                                                    arguments: recipient,
+                                                  );
+                                                },
+                                                child: const Text('Modifica Destinatario'),
                                               ),
                                               FilledButton(
                                                 onPressed: () {
                                                   Navigator.pop(context);
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) => GiftWizardPage(
-                                                        initialRecipient: recipient,
-                                                      ),
+                                                  context.read<GiftIdeasBloc>().add(
+                                                    GenerateGiftIdeasForRecipientRequested(
+                                                      recipientId: recipient.id,
+                                                      category: selectedCategory,
+                                                      minPrice: minPrice.toInt(),
+                                                      maxPrice: maxPrice.toInt(),
                                                     ),
                                                   );
                                                 },
-                                                child: Text('Conferma'),
+                                                child: const Text('Genera Regalo'),
                                               ),
                                             ],
-                                          ),
-                                        );
+                                          );
+                                        });
                                       },
                                     );
                                   },
@@ -281,8 +388,7 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-
-        );
+          );
         }
         return const Center(child: CircularProgressIndicator());
       },
@@ -332,18 +438,36 @@ class _HomePageState extends State<HomePage> {
             width: 60,
             height: 60,
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 60,
+              height: 60,
+              color: Colors.grey[200],
+              child: const Icon(Icons.broken_image, color: Colors.grey),
+            ),
           ),
         ),
         title: Text(gift.name),
         subtitle: Text('\$${gift.price.toStringAsFixed(2)}'),
         trailing: IconButton(
           icon: const Icon(Icons.shopping_cart_outlined),
-          onPressed: () {
-            // Open Amazon affiliate link
+          onPressed: () async {
+            if (gift.amazonUrl != null && await canLaunchUrl(Uri.parse(gift.amazonUrl!))) {
+              await launchUrl(Uri.parse(gift.amazonUrl!));
+            }
           },
         ),
       ),
     );
+  }
+
+  static int _calculateAge(DateTime birthDate) {
+    final today = DateTime.now();
+    int age = today.year - birthDate.year;
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+    return age;
   }
 
   static final List<PopularGift> _popularGifts = [
@@ -351,16 +475,19 @@ class _HomePageState extends State<HomePage> {
       name: 'Wireless Earbuds',
       price: 129.99,
       imageUrl: 'https://m.media-amazon.com/images/I/51R8U4qEfAL._AC_SL1500_.jpg',
+      amazonUrl: 'https://www.amazon.it/dp/B07XJ8C8F5',
     ),
     PopularGift(
       name: 'Smart Watch',
       price: 199.99,
       imageUrl: 'https://m.media-amazon.com/images/I/815fRQwqbKL.__AC_SY445_SX342_QL70_ML2_.jpg',
+      amazonUrl: 'https://www.amazon.it/dp/B09G6FPGTN',
     ),
     PopularGift(
       name: 'Portable Speaker',
       price: 79.99,
       imageUrl: 'https://m.media-amazon.com/images/I/71hwhYM7DiL.__AC_SX300_SY300_QL70_ML2_.jpg',
+      amazonUrl: 'https://www.amazon.it/dp/B07QK2SPP7',
     ),
   ];
 }
@@ -369,10 +496,12 @@ class PopularGift {
   final String name;
   final double price;
   final String imageUrl;
+  final String? amazonUrl;
 
   PopularGift({
     required this.name,
     required this.price,
     required this.imageUrl,
+    this.amazonUrl,
   });
 }

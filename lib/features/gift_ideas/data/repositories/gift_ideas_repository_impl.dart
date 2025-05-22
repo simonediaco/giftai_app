@@ -1,3 +1,4 @@
+
 import '../../domain/entities/gift.dart';
 import '../../domain/repositories/gift_ideas_repository.dart';
 import '../datasources/gift_ideas_remote_data_source.dart';
@@ -16,7 +17,8 @@ class GiftIdeasRepositoryImpl implements GiftIdeasRepository {
     String? relation,
     List<String>? interests,
     String? category,
-    String? budget,
+    int? minPrice,
+    int? maxPrice,
   }) async {
     final request = GiftGenerationRequest(
       name: name,
@@ -25,7 +27,8 @@ class GiftIdeasRepositoryImpl implements GiftIdeasRepository {
       relation: relation,
       interests: interests,
       category: category,
-      budget: budget,
+      min_price: minPrice,
+      max_price: maxPrice,
     );
     
     final response = await _remoteDataSource.generateGiftIdeas(request);
@@ -36,11 +39,13 @@ class GiftIdeasRepositoryImpl implements GiftIdeasRepository {
   Future<List<Gift>> generateGiftIdeasForRecipient(
     int recipientId, {
     String? category,
-    String? budget,
+    int? minPrice,
+    int? maxPrice,
   }) async {
     final additionalParams = GiftGenerationRequest(
       category: category,
-      budget: budget,
+      min_price: minPrice,
+      max_price: maxPrice,
     );
     
     final response = await _remoteDataSource.generateGiftIdeasForRecipient(

@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-
 import '../../../../core/theme/app_theme.dart';
 
 class BudgetOption extends StatelessWidget {
-  final String label;
-  final String description;
-  final int priceLevel;
+  final int minPrice;
+  final int maxPrice;
   final bool isSelected;
   final VoidCallback onTap;
 
   const BudgetOption({
     Key? key,
-    required this.label,
-    required this.description,
-    required this.priceLevel,
+    required this.minPrice,
+    required this.maxPrice,
     required this.isSelected,
     required this.onTap,
   }) : super(key: key);
@@ -21,84 +18,36 @@ class BudgetOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: isSelected ? AppTheme.elevationL : AppTheme.elevationS,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-        side: BorderSide(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Colors.transparent,
-          width: 2,
-        ),
-      ),
+      elevation: isSelected ? 2 : 0,
+      color: isSelected 
+          ? Theme.of(context).colorScheme.primary
+          : Theme.of(context).colorScheme.surface,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
         child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spaceM),
+          padding: const EdgeInsets.all(AppTheme.spaceL),
           child: Row(
             children: [
-              // Badge del prezzo
-              Container(
-                padding: const EdgeInsets.all(AppTheme.spaceM),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.primaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: _buildPriceIcon(context),
+              Icon(
+                Icons.euro,
+                color: isSelected 
+                    ? Theme.of(context).colorScheme.onPrimary
+                    : Theme.of(context).colorScheme.onSurface,
               ),
               const SizedBox(width: AppTheme.spaceM),
-              
-              // Testo
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : null,
-                          ),
-                    ),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
+              Text(
+                '${minPrice}€ - ${maxPrice}€',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: isSelected 
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              
-              // Icona di selezione
-              if (isSelected)
-                Icon(
-                  Icons.check_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPriceIcon(BuildContext context) {
-    final icons = List.generate(
-      priceLevel,
-      (index) => Icon(
-        Icons.euro,
-        size: 16,
-        color: isSelected ? Colors.white : Theme.of(context).colorScheme.primary,
-      ),
-    );
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: icons,
     );
   }
 }

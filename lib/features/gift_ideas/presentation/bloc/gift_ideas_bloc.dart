@@ -28,7 +28,8 @@ class GiftIdeasBloc extends Bloc<GiftIdeasEvent, GiftIdeasState> {
         relation: event.relation,
         interests: event.interests,
         category: event.category,
-        budget: event.budget,
+        minPrice: event.minPrice,
+        maxPrice: event.maxPrice,
       );
       emit(GiftIdeasGenerated(gifts));
     } catch (e) {

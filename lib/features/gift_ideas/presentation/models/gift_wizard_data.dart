@@ -5,7 +5,8 @@ class GiftWizardData {
   String? relation;
   List<String> interests;
   String? category;
-  String? budget;
+  int? minPrice;
+  int? maxPrice;
   
   GiftWizardData({
     this.name,
@@ -14,7 +15,8 @@ class GiftWizardData {
     this.relation,
     this.interests = const [],
     this.category,
-    this.budget,
+    this.minPrice,
+    this.maxPrice,
   });
 
   bool get isStepOneComplete => age != null;
@@ -22,7 +24,7 @@ class GiftWizardData {
   bool get isStepThreeComplete => relation != null && relation!.isNotEmpty;
   bool get isStepFourComplete => interests.isNotEmpty;
   bool get isStepFiveComplete => category != null && category!.isNotEmpty;
-  bool get isBudgetComplete => budget != null && budget!.isNotEmpty;
+  bool get isPriceComplete => minPrice != null && maxPrice != null;
   
   bool get isComplete => 
       isStepOneComplete && 
@@ -30,7 +32,7 @@ class GiftWizardData {
       isStepThreeComplete && 
       isStepFourComplete &&
       isStepFiveComplete &&
-      isBudgetComplete;
+      isPriceComplete;
       
   Map<String, dynamic> toJson() {
     return {
@@ -40,7 +42,8 @@ class GiftWizardData {
       'relation': relation ?? '',
       'interests': interests,
       'category': category ?? '',
-      'budget': budget ?? ''
+      'min_price': minPrice,
+      'max_price': maxPrice
     };
   }
 }
