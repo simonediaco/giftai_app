@@ -1,6 +1,6 @@
+// lib/features/gift_ideas/presentation/pages/gift_wizard_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../recipients/domain/entities/recipient.dart';
@@ -8,13 +8,14 @@ import '../bloc/gift_ideas_bloc.dart';
 import '../bloc/gift_ideas_event.dart';
 import '../bloc/gift_ideas_state.dart';
 import '../models/gift_wizard_data.dart';
-import '../widgets/gift_result_list.dart';
+import '../widgets/gift_result_list_enhanced.dart';
+import '../widgets/wizard_steps/step_intro.dart';
 import '../widgets/wizard_steps/step_age.dart';
-import '../widgets/wizard_steps/step_gender.dart'; // Nuovo step
+import '../widgets/wizard_steps/step_gender.dart';
 import '../widgets/wizard_steps/step_budget.dart';
 import '../widgets/wizard_steps/step_category.dart';
 import '../widgets/wizard_steps/step_interests.dart';
-import '../widgets/wizard_steps/step_loading.dart';
+import '../widgets/wizard_steps/step_loading_enhanced.dart';
 import '../widgets/wizard_steps/step_relation.dart';
 
 class GiftWizardPage extends StatefulWidget {
@@ -50,7 +51,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
   }
 
   void _nextStep() {
-    if (_currentStep < 6) {
+    if (_currentStep < 7) { // Aumentato a 7 per includere intro
       setState(() {
         _currentStep++;
       });
@@ -61,7 +62,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
       );
 
       // Se siamo all'ultimo step, avviamo la generazione
-      if (_currentStep == 6) {
+      if (_currentStep == 7) { // Aggiornato a 7
         context.read<GiftIdeasBloc>().add(
           GenerateGiftIdeasRequested(
             name: _wizardData.name,
@@ -71,7 +72,8 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
             interests: _wizardData.interests,
             category: _wizardData.category,
             minPrice: _wizardData.minPrice,
-            maxPrice: _wizardData.maxPrice,),
+            maxPrice: _wizardData.maxPrice,
+          ),
         );
       }
     }
@@ -95,19 +97,21 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
   String _getStepTitle() {
     switch (_currentStep) {
       case 0:
-        return 'Quanti anni ha il destinatario?';
+        return ''; // Nessun titolo per l'intro
       case 1:
-        return 'Qual è il genere del destinatario?';
+        return 'Quanti anni ha il destinatario?';
       case 2:
-        return 'Che tipo di relazione avete?';
+        return 'Qual è il genere del destinatario?';
       case 3:
-        return 'Quali sono i suoi interessi?';
+        return 'Che tipo di relazione avete?';
       case 4:
-        return 'Quale categoria preferisci?';
+        return 'Quali sono i suoi interessi?';
       case 5:
-        return 'Quanto vorresti spendere?';
+        return 'Quale categoria preferisci?';
       case 6:
-        return 'Stiamo generando idee perfette...';
+        return 'Quanto vorresti spendere?';
+      case 7:
+        return ''; // Nessun titolo per il loading
       default:
         return '';
     }
@@ -131,8 +135,8 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
         },
         builder: (context, state) {
           if (state is GiftIdeasGenerated) {
-            // Mostriamo la lista dei regali generati e offriamo di salvare destinatario
-            return GiftResultList(
+            // Mostriamo la lista dei regali generati con la versione migliorata
+            return GiftResultListEnhanced(
               gifts: state.gifts,
               wizardData: _wizardData,
             );
@@ -141,46 +145,48 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
           return SafeArea(
             child: Column(
               children: [
-                // App Bar personalizzata
-                Container(
-                  padding: const EdgeInsets.all(AppTheme.spaceM),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_rounded),
-                        onPressed: _previousStep,
-                      ),
-                      Expanded(
-                        child: LinearProgressIndicator(
-                          value: (_currentStep + 1) / 7,
-                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+                // App Bar personalizzata (nascosta per intro e loading)
+                if (_currentStep > 0 && _currentStep < 7)
+                  Container(
+                    padding: const EdgeInsets.all(AppTheme.spaceM),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_rounded),
+                          onPressed: _previousStep,
                         ),
-                      ),
-                      const SizedBox(width: AppTheme.spaceM),
-                      Text(
-                        '${_currentStep + 1}/7',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+                        Expanded(
+                          child: LinearProgressIndicator(
+                            value: _currentStep / 7, // Aggiornato a 7
+                            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+                          ),
+                        ),
+                        const SizedBox(width: AppTheme.spaceM),
+                        Text(
+                          '${_currentStep}/7', // Aggiornato
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
                 // Titolo dello step corrente
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spaceL,
-                    vertical: AppTheme.spaceM,
+                if (_getStepTitle().isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.spaceL,
+                      vertical: AppTheme.spaceM,
+                    ),
+                    child: Text(
+                      _getStepTitle(),
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  child: Text(
-                    _getStepTitle(),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
 
                 // Contenuto dello step
                 Expanded(
@@ -188,6 +194,11 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
                     controller: _pageController,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
+                      // Step 0: Introduzione
+                      StepIntro(
+                        onComplete: _nextStep,
+                      ),
+
                       // Step 1: Età
                       StepAge(
                         wizardData: _wizardData,
@@ -224,8 +235,8 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
                         onComplete: _nextStep,
                       ),
 
-                      // Step 7: Loading
-                      const StepLoading(),
+                      // Step 7: Loading migliorato
+                      const StepLoadingEnhanced(),
                     ],
                   ),
                 ),

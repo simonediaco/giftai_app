@@ -87,7 +87,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                   Hero(
                     tag: 'app_logo',
                     child: Image.asset(
-                      'assets/images/logo-02.png',
+                      'assets/images/donatello-logo.png',
                       width: 120,
                       height: 120,
                     ),

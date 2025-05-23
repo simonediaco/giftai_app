@@ -56,10 +56,10 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Donatello', // ✅ CHANGED: era 'GiftAI'
+        title: 'Donatello',
         theme: AppTheme.lightTheme(),
         darkTheme: AppTheme.darkTheme(),
-        themeMode: ThemeMode.dark, // ✅ FORCED DARK MODE - sempre dark mode
+        themeMode: ThemeMode.dark, 
         debugShowCheckedModeBanner: false,
         initialRoute: SplashPage.routeName,
         routes: {
