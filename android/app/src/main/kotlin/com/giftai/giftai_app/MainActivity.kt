@@ -1,4 +1,4 @@
-package com.giftai.giftai_app
+package com.simonediaco.donatello
 
 import io.flutter.embedding.android.FlutterActivity
 

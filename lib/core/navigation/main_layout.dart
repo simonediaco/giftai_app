@@ -36,8 +36,9 @@ class _MainLayoutState extends State<MainLayout> {
   final List<Widget> _pages = [
     const HomePage(),
     const RecipientsPage(),
-    const GiftWizardPage(),
     const SavedGiftsPage(),
+    const GiftWizardPage(),
+
   ];
   
   @override
@@ -211,14 +212,14 @@ class _MainLayoutState extends State<MainLayout> {
                     label: 'Destinatari',
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.auto_awesome_outlined, size: 22), // ✨ Stelline!
-                    activeIcon: Icon(Icons.auto_awesome, size: 22),
-                    label: 'Genera',
-                  ),
-                  BottomNavigationBarItem(
                     icon: Icon(Icons.favorite_border_outlined, size: 22),
                     activeIcon: Icon(Icons.favorite_rounded, size: 22),
                     label: 'Salvati',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.auto_awesome_outlined, size: 22), // ✨ Stelline!
+                    activeIcon: Icon(Icons.auto_awesome, size: 22),
+                    label: 'Genera',
                   ),
                 ],
               ),

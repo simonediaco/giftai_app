@@ -78,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: size.height * 0.35,
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage('assets/images/img-auth.png'),
+                          image: AssetImage('assets/images/donatello-auth-02.png'),
                           fit: BoxFit.cover,
                         ),
                       ),

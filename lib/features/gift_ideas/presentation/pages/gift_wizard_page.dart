@@ -9,6 +9,8 @@ import '../bloc/gift_ideas_event.dart';
 import '../bloc/gift_ideas_state.dart';
 import '../models/gift_wizard_data.dart';
 import '../widgets/gift_result_list_enhanced.dart';
+import '../widgets/wizard_steps/step_gender_enhanced.dart';
+import '../widgets/wizard_steps/step_interests_enhanced.dart';
 import '../widgets/wizard_steps/step_intro.dart';
 import '../widgets/wizard_steps/step_age.dart';
 import '../widgets/wizard_steps/step_gender.dart';
@@ -17,6 +19,7 @@ import '../widgets/wizard_steps/step_category.dart';
 import '../widgets/wizard_steps/step_interests.dart';
 import '../widgets/wizard_steps/step_loading_enhanced.dart';
 import '../widgets/wizard_steps/step_relation.dart';
+import '../widgets/wizard_steps/step_relation_enhanced.dart';
 
 class GiftWizardPage extends StatefulWidget {
   static const routeName = '/gift-wizard';
@@ -206,19 +209,19 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
                       ),
 
                       // Step 2: Genere
-                      StepGender(
+                      StepGenderEnhanced(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
 
                       // Step 3: Relazione
-                      StepRelation(
+                      StepRelationEnhanced(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),
 
                       // Step 4: Interessi
-                      StepInterests(
+                      StepInterestsEnhanced(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),

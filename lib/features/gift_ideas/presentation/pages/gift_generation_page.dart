@@ -7,7 +7,7 @@ import '../../../../shared/widgets/app_text_field.dart';
 import '../bloc/gift_ideas_bloc.dart';
 import '../bloc/gift_ideas_event.dart';
 import '../bloc/gift_ideas_state.dart';
-import '../widgets/gift_result_list.dart';
+import '../widgets/gift_result_list_enhanced.dart';
 
 class GiftGenerationPage extends StatefulWidget {
   static const routeName = '/gift-generation';
@@ -147,7 +147,7 @@ class _GiftGenerationPageState extends State<GiftGenerationPage> {
             );
           } else if (state is GiftIdeasGenerated) {
             // Mostra i risultati
-            return GiftResultList(gifts: state.gifts);
+            return GiftResultListEnhanced(gifts: state.gifts);
           } else {
             // Mostra il form di generazione
             return SingleChildScrollView(

@@ -38,7 +38,7 @@ class _StepGenderState extends State<StepGender> {
     {
       'value': 'N',
       'label': 'Non binario',
-      'icon': Icons.transgender,
+      'icon': Icons.transgender, //TODO: Cambiare con un'icona più appropriata
       'color': Colors.purple,
       'description': 'Non binario'
     },
@@ -46,16 +46,9 @@ class _StepGenderState extends State<StepGender> {
       'value': 'X',
       'label': 'Non specificato',
       'icon': Icons.person,
-      'color': Colors.grey,
+      'color': Colors.green,
       'description': 'Preferisco non specificare'
-    },
-    {
-      'value': 'O',
-      'label': 'Altro',
-      'icon': Icons.people,
-      'color': Colors.teal,
-      'description': 'Altra identità di genere'
-    },
+    }
   ];
 
   @override

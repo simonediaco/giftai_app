@@ -1,6 +1,6 @@
 {
-    "name": "giftai_app",
-    "short_name": "giftai_app",
+    "name": "donatello",
+    "short_name": "donatello",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

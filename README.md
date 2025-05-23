@@ -1,4 +1,4 @@
-# giftai_app
+# Donatello
 
 A new Flutter project.
 
