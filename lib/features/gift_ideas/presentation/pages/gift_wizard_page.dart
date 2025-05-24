@@ -1,4 +1,6 @@
 // lib/features/gift_ideas/presentation/pages/gift_wizard_page.dart
+import 'package:Donatello/features/gift_ideas/presentation/widgets/wizard_steps/step_budget_enhanced.dart';
+import 'package:Donatello/features/gift_ideas/presentation/widgets/wizard_steps/step_category_enhanced.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -227,7 +229,7 @@ class _GiftWizardPageState extends State<GiftWizardPage> with SingleTickerProvid
                       ),
 
                       // Step 5: Categoria
-                      StepCategory(
+                      StepCategoryEnhanced(
                         wizardData: _wizardData,
                         onComplete: _nextStep,
                       ),

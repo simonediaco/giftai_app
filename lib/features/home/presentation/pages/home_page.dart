@@ -302,8 +302,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         if (state is RecipientsLoaded) {
           if (state.recipients.isEmpty) {
             return const Padding(
-              padding: EdgeInsets.all(AppTheme.spaceL),
-              child: Center(child: Text('Nessun destinatario trovato')),
+              padding: EdgeInsets.all(AppTheme.spaceS),
+              // child: Center(child: Text('Nessun destinatario trovato')),
             );
           }
           

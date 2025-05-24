@@ -28,44 +28,32 @@ class _StepRelationEnhancedState extends State<StepRelationEnhanced> {
     RelationOption(
       value: 'amico',
       title: 'Amico/a',
-      icon: Icons.people_outline,
-      description: 'Un amico o amica',
-      color: Colors.blue,
+      icon: Icons.group,
+      gradient: [Colors.blue.shade400, Colors.blue.shade600],
     ),
     RelationOption(
       value: 'partner',
       title: 'Partner',
-      icon: Icons.favorite_border,
-      description: 'Fidanzato/a, marito/moglie',
-      color: Colors.red,
+      icon: Icons.favorite,
+      gradient: [Colors.red.shade400, Colors.red.shade600],
     ),
     RelationOption(
-      value: 'fratello',
-      title: 'Fratello/Sorella',
-      icon: Icons.family_restroom,
-      description: 'Fratello, sorella, familiare',
-      color: Colors.green,
-    ),
-    RelationOption(
-      value: 'conoscente',
-      title: 'Conoscente',
-      icon: Icons.people_outline,
-      description: 'Un conoscente',
-      color: Colors.orange,
+      value: 'familiare',
+      title: 'Familiare',
+      icon: Icons.home,
+      gradient: [Colors.green.shade400, Colors.green.shade600],
     ),
     RelationOption(
       value: 'collega',
       title: 'Collega',
-      icon: Icons.work_outline,
-      description: 'Collega di lavoro',
-      color: Colors.pinkAccent,
+      icon: Icons.work,
+      gradient: [Colors.orange.shade400, Colors.orange.shade600],
     ),
     RelationOption(
       value: 'altro',
       title: 'Altro',
       icon: Icons.edit,
-      description: 'Specifica la relazione',
-      color: Colors.purple,
+      gradient: [Colors.purple.shade400, Colors.purple.shade600],
     ),
   ];
   
@@ -73,21 +61,41 @@ class _StepRelationEnhancedState extends State<StepRelationEnhanced> {
   void initState() {
     super.initState();
     _selectedRelation = widget.wizardData.relation;
-    if (_selectedRelation == 'altro' || 
-        (_selectedRelation != null && !_isStandardRelation(_selectedRelation!))) {
+    
+    // Controlla se è una relazione custom
+    if (_selectedRelation != null && 
+        !['amico', 'partner', 'familiare', 'collega'].contains(_selectedRelation)) {
       _showCustomField = true;
-      _customRelationController.text = widget.wizardData.relation ?? '';
+      _customRelationController.text = _selectedRelation!;
+      _selectedRelation = 'altro';
     }
-  }
-  
-  bool _isStandardRelation(String relation) {
-    return ['amico', 'partner', 'familiare', 'collega'].contains(relation);
   }
   
   @override
   void dispose() {
     _customRelationController.dispose();
     super.dispose();
+  }
+
+  bool get _canContinue {
+    if (_showCustomField) {
+      return _customRelationController.text.trim().isNotEmpty;
+    }
+    return _selectedRelation != null && _selectedRelation != 'altro';
+  }
+
+  void _handleRelationTap(String value) {
+    setState(() {
+      _selectedRelation = value;
+      _showCustomField = value == 'altro';
+      
+      if (value == 'altro') {
+        widget.wizardData.relation = null;
+      } else {
+        widget.wizardData.relation = value;
+        _customRelationController.clear();
+      }
+    });
   }
 
   @override
@@ -101,101 +109,85 @@ class _StepRelationEnhancedState extends State<StepRelationEnhanced> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppTheme.spaceL),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Grid delle relazioni
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 1.2,
-                      crossAxisSpacing: AppTheme.spaceM,
-                      mainAxisSpacing: AppTheme.spaceM,
-                    ),
-                    itemCount: _relationOptions.length,
-                    itemBuilder: (context, index) {
-                      final option = _relationOptions[index];
-                      final isSelected = _selectedRelation == option.value ||
-                          (option.value == 'altro' && _showCustomField);
-                      
-                      return _RelationCard(
+                  // Lista opzioni verticale più semplice
+                  ...List.generate(_relationOptions.length, (index) {
+                    final option = _relationOptions[index];
+                    final isSelected = _selectedRelation == option.value;
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppTheme.spaceM),
+                      child: _RelationTile(
                         option: option,
                         isSelected: isSelected,
-                        onTap: () {
-                          setState(() {
-                            _selectedRelation = option.value;
-                            _showCustomField = option.value == 'altro';
-                            
-                            if (option.value == 'altro') {
-                              widget.wizardData.relation = null;
-                            } else {
-                              widget.wizardData.relation = option.value;
-                              _customRelationController.clear();
-                            }
-                          });
-                        },
-                      );
-                    },
-                  ),
+                        onTap: () => _handleRelationTap(option.value),
+                      ),
+                    );
+                  }),
                   
                   // Campo personalizzato
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
                     height: _showCustomField ? null : 0,
                     child: _showCustomField
-                        ? Column(
-                            children: [
-                              const SizedBox(height: AppTheme.spaceL),
-                              Container(
-                                padding: const EdgeInsets.all(AppTheme.spaceL),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-                                  border: Border.all(
-                                    color: theme.colorScheme.primary,
-                                    width: 2,
+                        ? Container(
+                            margin: const EdgeInsets.only(top: AppTheme.spaceM),
+                            padding: const EdgeInsets.all(AppTheme.spaceL),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  theme.colorScheme.primary.withOpacity(0.05),
+                                  theme.colorScheme.secondary.withOpacity(0.03),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+                              border: Border.all(
+                                color: theme.colorScheme.primary.withOpacity(0.3),
+                                width: 2,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Specifica la relazione',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.edit,
-                                          color: theme.colorScheme.primary,
-                                        ),
-                                        const SizedBox(width: AppTheme.spaceM),
-                                        Text(
-                                          'Specifica la relazione',
-                                          style: theme.textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
+                                const SizedBox(height: AppTheme.spaceM),
+                                TextFormField(
+                                  controller: _customRelationController,
+                                  autofocus: true,
+                                  style: theme.textTheme.bodyLarge,
+                                  decoration: InputDecoration(
+                                    hintText: 'Es. insegnante, vicino di casa, cognato...',
+                                    filled: true,
+                                    fillColor: theme.scaffoldBackgroundColor,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+                                      borderSide: BorderSide.none,
                                     ),
-                                    const SizedBox(height: AppTheme.spaceM),
-                                    TextFormField(
-                                      controller: _customRelationController,
-                                      autofocus: true,
-                                      decoration: InputDecoration(
-                                        hintText: 'Es. insegnante, vicino di casa, medico...',
-                                        filled: true,
-                                        fillColor: theme.scaffoldBackgroundColor,
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                      ),
-                                      onChanged: (value) {
-                                        widget.wizardData.relation = value.isNotEmpty ? value : null;
-                                      },
+                                    prefixIcon: Icon(
+                                      Icons.person_outline,
+                                      color: theme.colorScheme.primary,
                                     ),
-                                  ],
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      widget.wizardData.relation = value.trim().isNotEmpty ? value.trim() : null;
+                                    });
+                                  },
+                                  onFieldSubmitted: (_) {
+                                    if (_canContinue) {
+                                      widget.onComplete();
+                                    }
+                                  },
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           )
                         : const SizedBox.shrink(),
                   ),
@@ -207,8 +199,7 @@ class _StepRelationEnhancedState extends State<StepRelationEnhanced> {
           // Bottone continua
           WizardContinueButton(
             onPressed: widget.onComplete,
-            isEnabled: widget.wizardData.isStepThreeComplete || 
-                       (_showCustomField && _customRelationController.text.isNotEmpty),
+            isEnabled: _canContinue,
           ),
         ],
       ),
@@ -220,24 +211,22 @@ class RelationOption {
   final String value;
   final String title;
   final IconData icon;
-  final String description;
-  final Color color;
+  final List<Color> gradient;
   
   RelationOption({
     required this.value,
     required this.title,
     required this.icon,
-    required this.description,
-    required this.color,
+    required this.gradient,
   });
 }
 
-class _RelationCard extends StatelessWidget {
+class _RelationTile extends StatelessWidget {
   final RelationOption option;
   final bool isSelected;
   final VoidCallback onTap;
   
-  const _RelationCard({
+  const _RelationTile({
     Key? key,
     required this.option,
     required this.isSelected,
@@ -248,56 +237,75 @@ class _RelationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSelected ? option.color.withOpacity(0.1) : theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-          border: Border.all(
-            color: isSelected ? option.color : theme.colorScheme.outline.withOpacity(0.3),
-            width: isSelected ? 2 : 1,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(AppTheme.spaceL),
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? LinearGradient(
+                    colors: option.gradient,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            color: isSelected ? null : theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
+            border: Border.all(
+              color: isSelected
+                  ? option.gradient.last
+                  : theme.colorScheme.outline.withOpacity(0.3),
+              width: isSelected ? 2 : 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isSelected
+                    ? option.gradient.first.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: isSelected ? 12 : 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ),
-        padding: const EdgeInsets.all(AppTheme.spaceM),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: isSelected ? option.color : option.color.withOpacity(0.1),
-                shape: BoxShape.circle,
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.white.withOpacity(0.2)
+                      : option.gradient.first.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  option.icon,
+                  color: isSelected ? Colors.white : option.gradient.first,
+                  size: 24,
+                ),
               ),
-              child: Icon(
-                option.icon,
-                color: isSelected ? Colors.white : option.color,
-                size: 24,
+              const SizedBox(width: AppTheme.spaceL),
+              Expanded(
+                child: Text(
+                  option.title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: AppTheme.spaceS),
-            Text(
-              option.title,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? option.color : theme.colorScheme.onSurface,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              option.description,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 11,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+              if (isSelected)
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.white,
+                  size: 24,
+                ),
+            ],
+          ),
         ),
       ),
     );
