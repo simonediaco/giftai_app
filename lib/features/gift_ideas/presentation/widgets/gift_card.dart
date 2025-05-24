@@ -11,7 +11,7 @@ class GiftCard extends StatefulWidget {
   
   const GiftCard({
     Key? key,
-    required this.gift,
+    required this.gift, Null Function()? onSave,
   }) : super(key: key);
 
   @override

@@ -28,6 +28,7 @@ class RecipientModel extends Recipient {
           relation: relation,
           interests: interests,
           notes: notes,
+          favoriteColors: const [],
         );
 
   factory RecipientModel.fromJson(Map<String, dynamic> json) {

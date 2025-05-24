@@ -295,7 +295,7 @@ class _AddRecipientPageState extends State<AddRecipientPage> {
         birthDate: _birthDate,
         relation: _selectedRelation,
         interests: _selectedInterests,
-        notes: _notesController.text.isNotEmpty ? _notesController.text : null,
+        notes: _notesController.text.isNotEmpty ? _notesController.text : null, favoriteColors: [],
       );
       
       if (widget.recipient == null) {

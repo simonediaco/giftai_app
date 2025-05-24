@@ -7,12 +7,8 @@ import '../../../../core/theme/golden_accents.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../../features/recipients/domain/entities/recipient.dart';
-import '../../../../features/recipients/presentation/bloc/recipients_bloc.dart';
-import '../../../../features/recipients/presentation/bloc/recipients_event.dart';
 import '../../../../features/recipients/presentation/pages/add_recipient_page.dart';
 import '../../domain/entities/gift.dart';
-import '../bloc/gift_ideas_bloc.dart';
-import '../bloc/gift_ideas_event.dart';
 import '../models/gift_wizard_data.dart';
 import 'gift_card.dart';
 
@@ -31,26 +27,13 @@ class GiftResultListEnhanced extends StatefulWidget {
 }
 
 class _GiftResultListEnhancedState extends State<GiftResultListEnhanced> {
-  int _displayedGifts = 5; // Inizia mostrando 5 regali
-  bool _isLoadingMore = false;
+  int _displayedGifts = 4; // Mostra inizialmente 4 regali
+  bool _showingAll = false;
   
-  void _loadMoreGifts() async {
-    if (_displayedGifts >= widget.gifts.length) {
-      // Se abbiamo già mostrato tutti i regali disponibili
-      _showNoMoreResultsDialog();
-      return;
-    }
-    
+  void _loadMoreGifts() {
     setState(() {
-      _isLoadingMore = true;
-    });
-    
-    // Simula un piccolo delay per mostrare il loading
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    setState(() {
-      _displayedGifts = (_displayedGifts + 5).clamp(0, widget.gifts.length);
-      _isLoadingMore = false;
+      _displayedGifts = widget.gifts.length; // Mostra tutti (8)
+      _showingAll = true;
     });
   }
   
@@ -64,376 +47,285 @@ class _GiftResultListEnhancedState extends State<GiftResultListEnhanced> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
         ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.sentiment_dissatisfied,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: AppTheme.spaceM),
-            const Expanded(
-              child: Text('Non hai trovato il regalo perfetto?'),
-            ),
-          ],
-        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Mi dispiace che non abbia ancora trovato l\'idea giusta! 🎨',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: AppTheme.spaceM),
+            // Icona triste
             Container(
-              padding: const EdgeInsets.all(AppTheme.spaceM),
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(AppTheme.borderRadiusM),
+                shape: BoxShape.circle,
+                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
               ),
-              child: Text(
-                'Suggerimento: Prova ad aggiungere più dettagli come interessi specifici, '
-                'hobbies o passioni particolari per ottenere risultati più mirati!',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+              child: const Center(
+                child: Text(
+                  '😔',
+                  style: TextStyle(fontSize: 40),
                 ),
               ),
             ),
-            if (isAuthenticated && widget.wizardData != null) ...[
-              const SizedBox(height: AppTheme.spaceM),
-              const Text(
-                'Vuoi salvare questo destinatario e riprovare con più informazioni?',
-                style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+            const SizedBox(height: AppTheme.spaceL),
+            
+            Text(
+              'Non hai trovato il regalo perfetto?',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-            ],
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppTheme.spaceM),
+            
+            Text(
+              isAuthenticated 
+                  ? 'Vuoi salvare questo destinatario e fare una nuova ricerca con criteri diversi?'
+                  : 'Vuoi fare una nuova ricerca con criteri diversi?',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Rimani qui'),
+            child: const Text('No, rimani qui'),
           ),
-          if (isAuthenticated && widget.wizardData != null)
-            GoldenAccents.premiumButton(
-              text: 'Nuova ricerca',
-              icon: Icons.refresh,
-              onPressed: () {
-                Navigator.of(ctx).pop();
-                _startNewSearchWithRecipient();
-              },
-            )
-          else
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-                Navigator.of(context).pop(); // Torna al wizard
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Riprova'),
-            ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              if (isAuthenticated && widget.wizardData != null) {
+                _saveRecipientAndSearch();
+              } else {
+                _startNewSearch();
+              }
+            },
+            child: Text(isAuthenticated ? 'Sì, salva e riprova' : 'Sì, nuova ricerca'),
+          ),
         ],
       ),
     );
   }
   
-  void _startNewSearchWithRecipient() {
+  void _saveRecipientAndSearch() {
     if (widget.wizardData == null) return;
     
-    // Crea un destinatario temporaneo con i dati del wizard
-    final tempRecipient = Recipient(
-      id: -1, // ID temporaneo
+    final recipient = Recipient(
+      id: -1,
       name: widget.wizardData!.name ?? 'Destinatario',
-      gender: widget.wizardData!.gender,
+      gender: widget.wizardData!.gender ?? 'N',
       birthDate: DateTime(DateTime.now().year - (widget.wizardData!.age ?? 30)),
-      relation: widget.wizardData!.relation,
+      relation: widget.wizardData!.relation ?? 'altro',
       interests: widget.wizardData!.interests,
+      favoriteColors: [],
+      notes: '',
     );
     
-    // Naviga alla pagina di aggiunta destinatario
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => AddRecipientPage(
-          initialData: tempRecipient,
+          initialData: recipient,
         ),
       ),
     );
+  }
+  
+  void _startNewSearch() {
+    Navigator.of(context).pop(); // Chiude la pagina risultati
+    Navigator.of(context).pushReplacementNamed('/gift-wizard');
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final visibleGifts = widget.gifts.take(_displayedGifts).toList();
+    final isAuthenticated = context.read<AuthBloc>().state is Authenticated;
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Le tue idee regalo'),
+        title: const Text('Idee Regalo'),
+        backgroundColor: theme.colorScheme.primary,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.home),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
             },
-            tooltip: 'Nuova ricerca',
+            tooltip: 'Torna alla Home',
           ),
         ],
       ),
       body: Column(
         children: [
-          // Header con risultati e animazione
-          Container(
-            padding: const EdgeInsets.all(AppTheme.spaceL),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  theme.colorScheme.primaryContainer.withOpacity(0.3),
-                  theme.colorScheme.secondaryContainer.withOpacity(0.2),
-                ],
-              ),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(AppTheme.borderRadiusXL),
-                bottomRight: Radius.circular(AppTheme.borderRadiusXL),
-              ),
-            ),
-            child: Column(
-              children: [
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: 1),
-                  duration: const Duration(milliseconds: 800),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, child) {
-                    return Transform.scale(
-                      scale: value,
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(AppTheme.spaceM),
-                            decoration: BoxDecoration(
-                              gradient: GoldenAccents.goldGradient,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: GoldenAccents.primary.withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.celebration,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                          ),
-                          const SizedBox(width: AppTheme.spaceM),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Ecco le mie proposte!',
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Ho selezionato ${widget.gifts.length} idee regalo per te',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurface.withOpacity(0.7),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+          // Header con info destinatario
+          if (widget.wizardData != null)
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spaceL),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    theme.colorScheme.primaryContainer.withOpacity(0.3),
+                    theme.colorScheme.secondaryContainer.withOpacity(0.2),
+                  ],
                 ),
-                
-                // Contatore regali visualizzati
-                const SizedBox(height: AppTheme.spaceM),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spaceM,
-                    vertical: AppTheme.spaceS,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.person,
+                    color: theme.colorScheme.primary,
+                    size: 32,
                   ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.visibility,
-                        size: 16,
-                        color: theme.colorScheme.primary,
-                      ),
-                      const SizedBox(width: AppTheme.spaceS),
-                      Text(
-                        'Stai visualizzando $_displayedGifts di ${widget.gifts.length} risultati',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // Banner salvataggio destinatario (se applicabile)
-                if (widget.wizardData != null && context.read<AuthBloc>().state is Authenticated)
-                  Container(
-                    margin: const EdgeInsets.only(top: AppTheme.spaceM),
-                    padding: const EdgeInsets.all(AppTheme.spaceM),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-                      border: Border.all(
-                        color: GoldenAccents.primary.withOpacity(0.3),
-                      ),
-                    ),
-                    child: Row(
+                  const SizedBox(width: AppTheme.spaceM),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GoldenAccents.goldenIcon(Icons.person_add, size: 24),
-                        const SizedBox(width: AppTheme.spaceM),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Salva questo destinatario',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                'Per generare altri regali in futuro',
-                                style: theme.textTheme.bodySmall,
-                              ),
-                            ],
+                        Text(
+                          'Regalo per ${widget.wizardData!.name ?? "destinatario"}',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        TextButton(
-                          onPressed: () => _showSaveRecipientDialog(context),
-                          child: const Text('Salva'),
+                        Text(
+                          'Budget: €${widget.wizardData!.minPrice ?? 0} - €${widget.wizardData!.maxPrice ?? 100}',
+                          style: theme.textTheme.bodySmall,
                         ),
                       ],
                     ),
                   ),
-              ],
+                  if (isAuthenticated)
+                    TextButton.icon(
+                      onPressed: () {
+                        if (widget.wizardData != null) {
+                          final recipient = Recipient(
+                            id: -1,
+                            name: widget.wizardData!.name ?? 'Destinatario',
+                            gender: widget.wizardData!.gender ?? 'N',
+                            birthDate: DateTime(DateTime.now().year - (widget.wizardData!.age ?? 30)),
+                            relation: widget.wizardData!.relation ?? 'altro',
+                            interests: widget.wizardData!.interests,
+                            favoriteColors: [],
+                            notes: '',
+                          );
+                          
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => AddRecipientPage(
+                                initialData: recipient,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.person_add, size: 20),
+                      label: const Text('Salva'),
+                    ),
+                ],
+              ),
+            ),
+          
+          // Contatore risultati
+          Padding(
+            padding: const EdgeInsets.all(AppTheme.spaceM),
+            child: Text(
+              'Mostrando $_displayedGifts di ${widget.gifts.length} risultati',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           
-          // Lista regali con animazione
+          // Lista regali
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(AppTheme.spaceM),
-              itemCount: visibleGifts.length + (_displayedGifts < widget.gifts.length ? 1 : 0),
+              padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM),
+              itemCount: visibleGifts.length + (_showingAll ? 0 : 1),
               itemBuilder: (context, index) {
-                // Bottone "Carica altri"
-                if (index == visibleGifts.length) {
+                // Bottone "Mostra altri"
+                if (index == visibleGifts.length && !_showingAll) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceL),
                     child: Center(
-                      child: _isLoadingMore
-                          ? const CircularProgressIndicator()
-                          : GoldenAccents.premiumButton(
-                              text: 'Mostra altri regali',
-                              icon: Icons.expand_more,
-                              onPressed: _loadMoreGifts,
-                            ),
+                      child: ElevatedButton.icon(
+                        onPressed: _loadMoreGifts,
+                        icon: const Icon(Icons.expand_more),
+                        label: Text('Mostra altri ${widget.gifts.length - _displayedGifts} regali'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.spaceXL,
+                            vertical: AppTheme.spaceM,
+                          ),
+                        ),
+                      ),
                     ),
                   );
                 }
                 
-                // Card regalo con animazione di entrata
-                return TweenAnimationBuilder<double>(
-                  key: ValueKey(visibleGifts[index].id),
-                  tween: Tween(begin: 0, end: 1),
-                  duration: Duration(milliseconds: 300 + (index * 100)),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: Opacity(
-                        opacity: value,
-                        child: GiftCard(gift: visibleGifts[index]),
-                      ),
-                    );
-                  },
+                // Card regalo
+                final gift = visibleGifts[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppTheme.spaceM),
+                  child: GiftCard(
+                    gift: gift,
+                    onSave: isAuthenticated ? () {
+                      // TODO: Implementare salvataggio regalo
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Funzionalità in arrivo!'),
+                          backgroundColor: AppTheme.infoColor,
+                        ),
+                      );
+                    } : null,
+                  ),
                 );
               },
             ),
           ),
-        ],
-      ),
-      
-      // FAB per salvare tutti
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Funzionalità in arrivo! Salveremo tutti i regali preferiti'),
-              backgroundColor: AppTheme.infoColor,
+          
+          // Footer con azioni
+          Container(
+            padding: const EdgeInsets.all(AppTheme.spaceL),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
             ),
-          );
-        },
-        backgroundColor: theme.colorScheme.primary,
-        icon: const Icon(Icons.favorite_border),
-        label: const Text('Salva preferiti'),
-      ),
-    );
-  }
-  
-  void _showSaveRecipientDialog(BuildContext context) {
-    if (widget.wizardData == null) return;
-    
-    final initialData = Recipient(
-      id: -1,
-      name: widget.wizardData!.name ?? 'Destinatario',
-      gender: widget.wizardData!.gender,
-      birthDate: DateTime(DateTime.now().year - (widget.wizardData!.age ?? 30)),
-      relation: widget.wizardData!.relation,
-      interests: widget.wizardData!.interests,
-    );
-    
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.borderRadiusL),
-        ),
-        title: Row(
-          children: [
-            GoldenAccents.goldenIcon(Icons.person_add),
-            const SizedBox(width: AppTheme.spaceM),
-            const Text('Salvare destinatario?'),
-          ],
-        ),
-        content: const Text(
-          'Salvando questo destinatario potrai generare nuove idee regalo in futuro senza dover reinserire tutti i dati.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Dopo'),
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => AddRecipientPage(
-                    initialData: initialData,
+            child: Column(
+              children: [
+                // Bottone "Non hai trovato?" (solo quando sono mostrati tutti)
+                if (_showingAll)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppTheme.spaceM),
+                    child: TextButton.icon(
+                      onPressed: _showNoMoreResultsDialog,
+                      icon: const Icon(Icons.sentiment_dissatisfied),
+                      label: const Text('Non hai trovato il regalo giusto?'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                
+                // Bottone nuova ricerca
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _startNewSearch,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Nuova ricerca'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.secondary,
+                      padding: const EdgeInsets.all(AppTheme.spaceM),
+                    ),
                   ),
                 ),
-              );
-            },
-            icon: const Icon(Icons.save),
-            label: const Text('Salva ora'),
+              ],
+            ),
           ),
         ],
       ),

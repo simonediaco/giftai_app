@@ -177,7 +177,8 @@ class GiftResultList extends StatelessWidget {
       gender: wizardData!.gender,
       birthDate: DateTime(DateTime.now().year - (wizardData!.age ?? 30)), // Stima approssimativa
       relation: wizardData!.relation,
-      interests: wizardData!.interests,
+      interests: wizardData!.interests, 
+      favoriteColors: [],
     );
     
     showDialog(

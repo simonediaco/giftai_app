@@ -16,7 +16,7 @@ class Recipient extends Equatable {
     required this.birthDate,
     this.relation,
     this.interests = const [],
-    this.notes,
+    this.notes, required List favoriteColors,
   });
   
   @override
